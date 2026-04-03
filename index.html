@@ -80,6 +80,7 @@
         .hover-details { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(15, 15, 15, 0.98); padding: 15px 12px; opacity: 0; visibility: hidden; transition: 0.3s; border-top: 1px solid var(--primary); border-radius: 0 0 8px 8px; max-height: 100%; overflow: hidden; }
         .item-card:hover .hover-details { opacity: 1; visibility: visible; }
         .item-name { font-size: 13px; font-weight: bold; margin-bottom: 8px; color: #fff; text-align: center; }
+        .item-name:hover { color: var(--primary); }
         .item-story { font-size: 11px; color: #ccc; line-height: 1.5; margin-bottom: 10px; height: 50px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; text-align: center; direction: rtl; }
         .meta-info { display: flex; justify-content: center; gap: 8px; font-size: 10px; color: #aaa; margin-bottom: 10px; }
         .meta-info span { border: 1px solid #333; padding: 2px 6px; border-radius: 3px; background: #000; }
@@ -206,8 +207,9 @@
     </div>
 
     <script>
-        const API_KEY = 'b838a848a571a893e6b0effe4bd53db8';
-        const BASE_URL = 'https://api.themoviedb.org/3';
+        // التعديل هنا: شلنا الـ Key والـ URL ليكون الربط عبر الباك إند
+        const API_KEY = ''; // هيتحط في ملف الباك إند فقط
+        const BASE_URL = '/api'; // العنوان ده بيفترض إن الفرونت والباك على نفس الدومين أو بتوجه للسيرفر الجديد
 
         function toggleSearch() { 
             const s = document.getElementById("searchBox");
@@ -221,7 +223,8 @@
             const date = m.release_date || m.first_air_date || '2026';
             const year = date.split('-')[0];
             
-            const resAr = await fetch(`${BASE_URL}/${type}/${m.id}?api_key=${API_KEY}&language=ar-SA`);
+            // شلنا الـ api_key من هنا
+            const resAr = await fetch(`${BASE_URL}/${type}/${m.id}?language=ar-SA`);
             const arData = await resAr.json();
 
             const displayName = isArabic ? (arData.title || arData.name || m.title || m.name) : (m.title || m.name);
@@ -242,7 +245,6 @@
                 </div>`;
         }
 
-        // دالة البحث الذكي
         let searchTimer;
         function smartSearch(query) {
             clearTimeout(searchTimer);
@@ -258,20 +260,19 @@
             document.getElementById('fullGrid').innerHTML = '<div class="no-results">جاري البحث...</div>';
 
             try {
-                // البحث في الأفلام والمسلسلات في نفس الوقت لزيادة الدقة
+                // شلنا الـ api_key من هنا
                 const [movieRes, tvRes] = await Promise.all([
-                    fetch(`${BASE_URL}/search/movie?api_key=${API_KEY}&query=${query}&language=ar-SA`),
-                    fetch(`${BASE_URL}/search/tv?api_key=${API_KEY}&query=${query}&language=ar-SA`)
+                    fetch(`${BASE_URL}/search/movie?query=${query}&language=ar-SA`),
+                    fetch(`${BASE_URL}/search/tv?query=${query}&language=ar-SA`)
                 ]);
 
                 const movieData = await movieRes.json();
                 const tvData = await tvRes.json();
 
-                // دمج النتائج وترتيبها حسب الشعبية والوجود الفعلي لصورة البوستر
                 let combinedResults = [
                     ...movieData.results.map(i => ({...i, media_type: 'movie'})),
                     ...tvData.results.map(i => ({...i, media_type: 'tv'}))
-                ].filter(item => item.poster_path) // استبعاد النتائج اللي ملهاش صورة
+                ].filter(item => item.poster_path)
                  .sort((a, b) => b.popularity - a.popularity);
 
                 if (combinedResults.length === 0) {
@@ -281,7 +282,7 @@
 
                 const cards = await Promise.all(combinedResults.map(m => createCard(m, m.media_type)));
                 document.getElementById('fullGrid').innerHTML = cards.join('');
-                document.getElementById('fullPag').innerHTML = ''; // إخفاء الترقيم في البحث لسرعة العرض
+                document.getElementById('fullPag').innerHTML = '';
 
             } catch (err) {
                 document.getElementById('fullGrid').innerHTML = '<div class="no-results">حدث خطأ أثناء البحث، حاول مرة أخرى.</div>';
@@ -309,16 +310,17 @@
         }
 
         async function init() {
-            loadSection(`${BASE_URL}/discover/tv?api_key=${API_KEY}&with_original_language=ar&language=ar-SA&first_air_date_year=2026`, 'ramadanGrid', 'ramadanPag', 'tv');
-            loadSection(`${BASE_URL}/discover/movie?api_key=${API_KEY}`, 'egyptGrid', 'egyptPag', 'movie', 'egypt');
-            loadSection(`${BASE_URL}/discover/movie?api_key=${API_KEY}`, 'arabicGrid', 'arabicPag', 'movie', 'arabic_only');
-            loadSection(`${BASE_URL}/discover/movie?api_key=${API_KEY}&language=en-US`, 'moviesGrid', 'moviesPag', 'movie');
+            // شلنا الـ api_key من كل الـ URLs
+            loadSection(`${BASE_URL}/discover/tv?with_original_language=ar&language=ar-SA&first_air_date_year=2026`, 'ramadanGrid', 'ramadanPag', 'tv');
+            loadSection(`${BASE_URL}/discover/movie?query=`, 'egyptGrid', 'egyptPag', 'movie', 'egypt');
+            loadSection(`${BASE_URL}/discover/movie?query=`, 'arabicGrid', 'arabicPag', 'movie', 'arabic_only');
+            loadSection(`${BASE_URL}/discover/movie?language=en-US`, 'moviesGrid', 'moviesPag', 'movie');
 
-            const pop = await fetch(`${BASE_URL}/movie/now_playing?api_key=${API_KEY}&language=en-US`);
+            const pop = await fetch(`${BASE_URL}/movie/now_playing?language=en-US`);
             const pData = await pop.json();
             renderSlider(pData.results.slice(0, 5));
 
-            const top = await fetch(`${BASE_URL}/movie/top_rated?api_key=${API_KEY}&language=ar-SA`);
+            const top = await fetch(`${BASE_URL}/movie/top_rated?language=ar-SA`);
             const tData = await top.json();
             document.getElementById('bestMoviesSide').innerHTML = tData.results.slice(0, 8).map(m => `
                 <div class="side-item" onclick="location.href='movie.html?id=${m.id}&type=movie'">
@@ -326,7 +328,7 @@
                     <div class="txt" style="margin-right:10px">${m.title}</div>
                 </div>`).join('');
 
-            const ani = await fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=16&language=en-US&sort_by=primary_release_date.desc`);
+            const ani = await fetch(`${BASE_URL}/discover/movie?with_genres=16&language=en-US&sort_by=primary_release_date.desc`);
             const aniData = await ani.json();
             document.getElementById('animeSide').innerHTML = aniData.results.slice(0, 8).map(m => `
                 <div class="side-item" onclick="location.href='movie.html?id=${m.id}&type=movie'">
@@ -354,7 +356,8 @@
             document.getElementById('fullTitle').innerText = title;
 
             const sortParam = endpoint.includes('tv') ? '&sort_by=first_air_date.desc' : '&sort_by=primary_release_date.desc';
-            let url = `${BASE_URL}/${endpoint}?api_key=${API_KEY}${sortParam}&page=${page}`;
+            // شلنا الـ api_key من هنا
+            let url = `${BASE_URL}/${endpoint}?${sortParam}&page=${page}`;
             
             if(cat === 'egypt') url += `&with_origin_country=EG&with_original_language=ar`;
             else if(cat === 'arabic_only') url += `&with_original_language=ar&without_origin_country=EG`;
@@ -382,3 +385,4 @@
     </script>
 </body>
 </html>
+
