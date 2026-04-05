@@ -83,12 +83,32 @@
         .slider-container { max-width: 1620px; margin: 20px auto; padding: 0 40px; }
         #heroSection { width: 100%; height: 420px; position: relative; overflow: hidden; border-radius: 15px; border: 1px solid var(--border-color); background: #000; }
         .slider-wrapper { display: flex; width: 100%; height: 100%; transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
-        .slide { min-width: 100%; height: 100%; background-size: cover; background-position: center 20%; position: relative; }
+        .slide { min-width: 100%; height: 100%; background-size: cover; background-position: center 20%; position: relative; cursor: pointer; }
         
         .container { padding: 20px 40px; display: grid; grid-template-columns: 280px 1fr 280px; gap: 25px; max-width: 1700px; margin: 0 auto; }
         .sidebar { background: #111; border: 1px solid var(--border-color); border-radius: 8px; height: fit-content; position: sticky; top: 90px; }
         .section-title { background: #111; padding: 12px 20px; font-size: 17px; font-weight: bold; margin-bottom: 20px; border-right: 5px solid var(--primary); display: flex; justify-content: space-between; align-items: center; }
         .hidden { display: none !important; }
+
+        /* ===== التعديلات المضافة (من أكواد المستخدم) ===== */
+        .main-layout { display: flex; flex-direction: column; gap: 30px; }
+        .movie-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); 
+            gap: 12px; 
+        }
+        .watch-btn-sm { 
+            background: var(--primary); color: #fff; padding: 6px 15px; 
+            border-radius: 4px; font-size: 13px; font-weight: 500;
+            border: none; cursor: pointer; width: fit-content; margin-top: 10px;
+        }
+        .part-row { display: flex; gap: 10px; margin-bottom: 10px; padding: 10px; background: #1a1a1a; border-radius: 5px; align-items: center; flex-wrap: wrap; }
+        .part-row input { flex: 1; background: #222; border: 1px solid #444; color: white; padding: 8px; border-radius: 6px; }
+        .color-dot { width: 25px; height: 25px; border-radius: 50%; cursor: pointer; border: 1px solid #fff; transition: 0.2s; }
+        .palette-box { display: grid; grid-template-columns: repeat(10, 1fr); gap: 8px; padding: 15px; background: #0a0a0a; border-radius: 12px; margin-top: 15px; }
+        .episode-thumb { display: inline-block; margin: 10px; border: 1px solid var(--primary); padding: 5px; border-radius: 8px; background: #111; text-align: center; width: 120px; }
+        .episode-thumb img { width: 100%; height: 80px; object-fit: cover; border-radius: 4px; background: #222; }
+        .episode-thumb button { margin-top: 5px; width: 100%; background: var(--primary); border: none; padding: 4px; border-radius: 4px; color: white; cursor: pointer; font-size: 11px; }
     </style>
 </head>
 <body>
@@ -136,6 +156,7 @@
         </aside>
     </div>
 
+    <!-- المودال الأصلي لإضافة الأفلام والمسلسلات -->
     <div id="adminModal" class="admin-modal-full">
         <div class="preview-header" id="preBackdrop">
             <button class="edit-overlay-btn" style="top:20px; left:20px;" onclick="document.getElementById('bgUpload').click()">تغيير الغلاف</button>
@@ -168,6 +189,23 @@
             </div>
         </div>
     </div>
+
+    <!-- مودال جديد لتعديل الحلقات (شاشة ممسوحة) كما طلب المستخدم -->
+    <div id="episodeModal" class="admin-modal-full" style="display: none;">
+        <div style="padding:30px; max-width:600px; margin: 50px auto; background:#0a0a0a; border-radius:20px; border:1px solid var(--primary);">
+            <h3 style="color:var(--primary); margin-bottom:20px;">✏️ تعديل تفاصيل الحلقة</h3>
+            <input type="text" id="epName" placeholder="اسم الحلقة (مثلاً: الحلقة 1)" style="width:100%; margin:10px 0; padding:12px; background:#111; border:1px solid #333; color:white; border-radius:8px;">
+            <textarea id="epStory" placeholder="وصف الحلقة..." style="width:100%; height:100px; margin:10px 0; padding:12px; background:#111; border:1px solid #333; color:white; border-radius:8px;"></textarea>
+            <input type="text" id="epLink" placeholder="رابط المشاهدة" style="width:100%; margin:10px 0; padding:12px; background:#111; border:1px solid #333; color:white; border-radius:8px;">
+            <button onclick="saveEpisodeDetails()" style="background:var(--primary); color:white; width:100%; padding:12px; border:none; border-radius:8px; font-weight:bold; margin-top:15px;">💾 حفظ الحلقة</button>
+            <button onclick="closeEpisodeModal()" style="background:#222; color:#aaa; width:100%; padding:12px; border:none; border-radius:8px; margin-top:10px;">إلغاء</button>
+        </div>
+    </div>
+
+    <!-- حاويات مخفية للوظائف المضافة (حتى تعمل دوال المستخدم بدون أخطاء) -->
+    <div id="partsContainer" style="display: none;"></div>
+    <div id="episodesList" style="display: none;"></div>
+
     <script>
         const BASE_URL = 'https://script.google.com/macros/s/AKfycbw4GkkBMwuUqmeMBYUNV1u0LvQvMla1MgM6ActKpZsdhVvPUnUqdi1StaL_1KkEgniV2A/exec';
         let currentTargetGrid = '';
@@ -178,8 +216,10 @@
             s.style.display = s.style.display === "block" ? "none" : "block";
         }
 
+        // دالة تغيير اللون مع حفظ في localStorage (تم دمج التعديل المطلوب)
         function changeMainTheme(color) {
             document.documentElement.style.setProperty('--primary', color);
+            localStorage.setItem('userTheme', color);
         }
 
         function editSiteTitle() {
@@ -194,7 +234,10 @@
                 reader.onload = (e) => {
                     const el = document.getElementById(targetId);
                     if(isBg) el.style.backgroundImage = `url(${e.target.result})`;
-                    else el.src = e.target.result;
+                    else {
+                        if(el.tagName === 'IMG') el.src = e.target.result;
+                        else el.style.backgroundImage = `url(${e.target.result})`;
+                    }
                 };
                 reader.readAsDataURL(input.files[0]);
             }
@@ -268,16 +311,154 @@
         function renderSlider(movies) {
             const wrapper = document.getElementById('sliderWrapper');
             wrapper.innerHTML = movies.map(m => `
-                <div class="slide" style="background-image: url('https://image.tmdb.org/t/p/original${m.backdrop_path}')">
+                <div class="slide" style="background-image: url('https://image.tmdb.org/t/p/original${m.backdrop_path}')" onclick="location.href='movie.html?id=${m.id}'">
                     <div style="position:absolute; inset:0; background:linear-gradient(to top, #070707 5%, transparent 70%); padding:40px; display:flex; flex-direction:column; justify-content:flex-end;">
                         <h2 style="font-size:32px; font-weight:900;">${m.title || m.name}</h2>
                         <button class="action-btn" style="width:120px; margin-top:15px;">شاهد الآن</button>
                     </div>
                 </div>`).join('');
-            let i = 0; setInterval(() => { i = (i + 1) % 5; wrapper.style.transform = `translateX(${i * 100}%)`; }, 5000);
+            let i = 0; setInterval(() => { i = (i + 1) % movies.length; wrapper.style.transform = `translateX(${i * 100}%)`; }, 5000);
         }
 
+        // ========== التعديلات المضافة بناءً على أكواد المستخدم ==========
+        // قائمة الألوان الجاهزة
+        const colors = ["#9b51e0", "#e91e63", "#2196f3", "#4caf50", "#ff9800", "#f44336", "#00bcd4", "#8bc34a", "#ffeb3b", "#795548", "#607d8b", "#ff4081", "#7c4dff", "#00e5ff", "#00c853", "#ffd600", "#ff6d00", "#d500f9", "#3d5afe", "#1de9b6", "#c6ff00", "#ffea00", "#ff3d00", "#76ff03", "#00b0ff"];
+
+        // دالة لتطبيق اللون (بنفس الاسم الذي طلبه المستخدم)
+        function applyTheme(color) {
+            document.documentElement.style.setProperty('--primary', color);
+            localStorage.setItem('siteTheme', color);
+        }
+
+        // إضافة أجزاء الفيلم (متعددة)
+        function addMoviePart() {
+            const container = document.getElementById('partsContainer');
+            if(!container) return;
+            const div = document.createElement('div');
+            div.className = 'part-row';
+            div.innerHTML = `
+                <input type="text" placeholder="اسم الجزء" style="flex:1;">
+                <input type="text" placeholder="رابط التحميل">
+                <input type="file" accept="video/*">
+                <button onclick="this.parentElement.remove()" style="color:red; background:none; border:none; cursor:pointer;">✖</button>
+            `;
+            container.appendChild(div);
+        }
+
+        // إضافة حلقة جديدة (صورة أولاً ثم تعديل التفاصيل)
+        let currentEditingEpId = null;
+        function addQuickEpisode() {
+            const epId = Date.now();
+            const html = `
+                <div id="ep_${epId}" class="episode-thumb">
+                    <div style="width:100%; height:80px; background:#222; cursor:pointer; border-radius:4px; overflow:hidden;" onclick="document.getElementById('file_${epId}').click()">
+                        <img id="img_${epId}" style="width:100%; height:100%; display:none; object-fit:cover;">
+                        <p id="label_${epId}" style="font-size:10px; text-align:center; line-height:80px;">📸 اختر صورة</p>
+                    </div>
+                    <input type="file" id="file_${epId}" hidden accept="image/*" onchange="previewImg(this, '${epId}')">
+                    <button onclick="openEpisodeEditor('${epId}')">✏️ تعديل التفاصيل</button>
+                </div>`;
+            document.getElementById('episodesList').insertAdjacentHTML('beforeend', html);
+        }
+
+        function previewImg(input, id) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = document.getElementById('img_'+id);
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                    const label = document.getElementById('label_'+id);
+                    if(label) label.style.display = 'none';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function openEpisodeEditor(epId) {
+            currentEditingEpId = epId;
+            const modal = document.getElementById('episodeModal');
+            // مسح القيم السابقة
+            document.getElementById('epName').value = '';
+            document.getElementById('epStory').value = '';
+            document.getElementById('epLink').value = '';
+            modal.style.display = 'flex';
+        }
+
+        function saveEpisodeDetails() {
+            if(!currentEditingEpId) return;
+            const epName = document.getElementById('epName').value;
+            const epStory = document.getElementById('epStory').value;
+            const epLink = document.getElementById('epLink').value;
+            // تخزين البيانات مؤقتاً في الـ element نفسه (attributes أو data)
+            const epDiv = document.getElementById(`ep_${currentEditingEpId}`);
+            if(epDiv) {
+                epDiv.setAttribute('data-name', epName);
+                epDiv.setAttribute('data-story', epStory);
+                epDiv.setAttribute('data-link', epLink);
+                // إضافة نص صغير تحت الصورة يظهر اسم الحلقة
+                let nameSpan = epDiv.querySelector('.ep-name');
+                if(!nameSpan) {
+                    nameSpan = document.createElement('div');
+                    nameSpan.className = 'ep-name';
+                    nameSpan.style.fontSize = '10px';
+                    nameSpan.style.marginTop = '5px';
+                    nameSpan.style.color = '#ccc';
+                    epDiv.appendChild(nameSpan);
+                }
+                nameSpan.innerText = epName || 'بدون عنوان';
+            }
+            closeEpisodeModal();
+            alert('تم حفظ تفاصيل الحلقة بنجاح');
+        }
+
+        function closeEpisodeModal() {
+            document.getElementById('episodeModal').style.display = 'none';
+            currentEditingEpId = null;
+        }
+
+        // نظام السلايدر المطور (من تعديلات المستخدم) - تم دمج الكود الأصلي مع إضافة onclick للـ slide
+        function setupSlider() {
+            const slides = document.querySelectorAll('.slide');
+            slides.forEach(slide => {
+                slide.onclick = () => {
+                    const movieId = slide.getAttribute('data-id');
+                    if(movieId) window.location.href = `movie.html?id=${movieId}`;
+                };
+            });
+        }
+
+        // دالة حذف عامة (من تعديلات المستخدم)
+        function deleteItem(id) {
+            if(confirm("هل تريد حذف هذا العمل نهائياً؟")) {
+                const item = document.getElementById('item_'+id);
+                if(item) item.remove();
+                // يمكن إضافة كود مسح من السيرفر هنا
+            }
+        }
+
+        // دالة لإنشاء باليتة الألوان في أي مكان (اختياري - يمكن استدعاؤها)
+        function renderColorPalette(containerId) {
+            const container = document.getElementById(containerId);
+            if(!container) return;
+            container.innerHTML = '';
+            colors.forEach(c => {
+                const dot = document.createElement('div');
+                dot.className = 'color-dot';
+                dot.style.backgroundColor = c;
+                dot.onclick = () => applyTheme(c);
+                container.appendChild(dot);
+            });
+        }
+
+        // دمج استرجاع اللون مع الـ onload الأصلي
         window.onload = () => {
+            // استرجاع اللون المحفوظ (من تعديلات المستخدم)
+            const savedTheme = localStorage.getItem('siteTheme') || localStorage.getItem('userTheme');
+            if(savedTheme) {
+                document.documentElement.style.setProperty('--primary', savedTheme);
+            }
+            // الوظائف الأصلية للصفحة
             renderSection("مسلسلات رمضان 2026", "ramadan");
             renderSection("أفلام مصرية حديثة", "egypt");
             loadData('discover/tv', 'grid_ramadan', 'tv');
@@ -285,6 +466,45 @@
             loadData('movie/popular', 'sliderWrapper', 'movie');
             loadData('movie/top_rated', 'bestMoviesSide', 'movie');
             loadData('tv/popular', 'animeSide', 'tv');
+            
+            // إضافة باليتة الألوان في الـ header مثلاً (يمكن إظهارها)
+            // لكن دون تعديل مظهر موجود، فقط نضيفها في الـ header-icons بشكل خفيف
+            const headerIcons = document.querySelector('.header-icons');
+            if(headerIcons && !document.getElementById('customPaletteBtn')) {
+                const paletteIcon = document.createElement('i');
+                paletteIcon.className = "fa-solid fa-palette icon-btn";
+                paletteIcon.style.cursor = "pointer";
+                paletteIcon.style.marginLeft = "10px";
+                paletteIcon.style.fontSize = "18px";
+                paletteIcon.onclick = () => {
+                    let existing = document.getElementById('floatingPalette');
+                    if(existing) existing.remove();
+                    const div = document.createElement('div');
+                    div.id = 'floatingPalette';
+                    div.className = 'palette-box';
+                    div.style.position = 'absolute';
+                    div.style.top = '70px';
+                    div.style.left = '20px';
+                    div.style.zIndex = '9999';
+                    div.style.background = '#111';
+                    div.style.border = '1px solid var(--primary)';
+                    div.style.borderRadius = '12px';
+                    div.style.width = '300px';
+                    div.style.padding = '10px';
+                    colors.forEach(c => {
+                        const dot = document.createElement('div');
+                        dot.className = 'color-dot';
+                        dot.style.backgroundColor = c;
+                        dot.style.width = '22px';
+                        dot.style.height = '22px';
+                        dot.onclick = () => { applyTheme(c); div.remove(); };
+                        div.appendChild(dot);
+                    });
+                    document.body.appendChild(div);
+                    setTimeout(() => { document.addEventListener('click', function rem(e) { if(!div.contains(e.target) && e.target !== paletteIcon) { div.remove(); document.removeEventListener('click', rem); } }); }, 100);
+                };
+                headerIcons.appendChild(paletteIcon);
+            }
         };
     </script>
 </body>
