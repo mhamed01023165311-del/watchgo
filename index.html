@@ -207,9 +207,9 @@
     </div>
 
     <script>
-        // التعديل هنا: شلنا الـ Key والـ URL ليكون الربط عبر الباك إند
-        const API_KEY = ''; // هيتحط في ملف الباك إند فقط
-        const BASE_URL = '/api'; // العنوان ده بيفترض إن الفرونت والباك على نفس الدومين أو بتوجه للسيرفر الجديد
+        // التعديل هنا: شلنا الـ Key والـ URL ليكون الربط عبر البا
+        const API_KEY = '480fd49f76a6c9ada2b91fc2297c6af7'; 
+        const BASE_URL = 'https://script.google.com/macros/s/AKfycbw4GkkBMwuUqmeMBYUNV1u0LvQvMla1MgM6ActKpZsdhVvPUnUqdi1StaL_1KkEgniV2A/exec';
 
         function toggleSearch() { 
             const s = document.getElementById("searchBox");
@@ -224,7 +224,7 @@
             const year = date.split('-')[0];
             
             // شلنا الـ api_key من هنا
-            const resAr = await fetch(`${BASE_URL}/${type}/${m.id}?language=ar-SA`);
+            const resAr = await fetch(`${BASE_URL}?endpoint=${type}/${m.id}`);
             const arData = await resAr.json();
 
             const displayName = isArabic ? (arData.title || arData.name || m.title || m.name) : (m.title || m.name);
