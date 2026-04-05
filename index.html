@@ -299,7 +299,9 @@
             const res = await fetch(finalUrl);
             const data = await res.json();
             
-            const cards = await Promise.all(data.results.slice(0, 12).map(m => createCard(m, type)));
+            const data = await res.json();
+            const movies = data.results || data; // ده السطر "الجوكر" اللي هيحل الليلة
+            const cards = await Promise.all(movies.slice(0, 12).map(m => createCard(m, type)));
             document.getElementById(gridId).innerHTML = cards.join('');
             
             let pagHtml = '';
