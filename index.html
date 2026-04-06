@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WatchGo - Developer Hub</title>
+    <title>WatchGo - Smart Cinema Hub (النسخة الكاملة)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { 
@@ -17,290 +17,285 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }  
         body { background: var(--bg-dark); color: #fff; font-family: 'Segoe UI', Tahoma, sans-serif; overflow-x: hidden; scroll-behavior: smooth; }  
 
-        /* --- الهيدر --- */  
+        /* --- الهيدر (التصميم الأصلي) --- */  
         .header {   
-            background: rgba(0,0,0,0.9); padding: 0 40px; height: 75px;  
+            background: #000; padding: 0 40px; height: 75px;  
             display: flex; justify-content: space-between; align-items: center;   
             border-bottom: 2px solid var(--primary); position: sticky; top: 0; z-index: 2000;  
-            backdrop-filter: blur(10px);
         }  
-        .logo-ctn { display: flex; align-items: center; gap: 10px; text-decoration: none; color: white; }  
+        .logo-ctn { display: flex; align-items: center; gap: 10px; text-decoration: none; color: white; flex-shrink: 0; }  
         .logo-ctn img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--primary); }  
 
-        .header-icons { display: flex; align-items: center; gap: 15px; }  
-        .icon-btn { color: #ccc; cursor: pointer; font-size: 18px; transition: 0.3s; }  
-        .icon-btn:hover { color: var(--primary); transform: scale(1.1); }  
+        .main-nav { display: flex; list-style: none; height: 100%; align-items: center; gap: 5px; }  
+        .nav-item { position: relative; height: 100%; display: flex; align-items: center; }  
+        .nav-link {   
+            color: #eee; text-decoration: none; font-size: 14px; font-weight: 600;   
+            padding: 0 15px; cursor: pointer; display: flex; align-items: center; gap: 6px;  
+            height: 100%; transition: 0.3s;  
+        }  
+        .nav-link:hover { color: var(--primary); background: rgba(155, 81, 224, 0.05); }  
+
+        .dropdown {   
+            position: absolute; top: 75px; right: 0; background: #0a0a0a; min-width: 220px;   
+            border-top: 3px solid var(--primary); display: none; flex-direction: column;   
+            box-shadow: 0 15px 30px rgba(0,0,0,0.9); z-index: 3000;  
+        }  
+        .nav-item:hover .dropdown { display: flex; }  
+        .dropdown a { color: #ccc; padding: 12px 20px; text-decoration: none; font-size: 13px; border-bottom: 1px solid #1a1a1a; text-align: right; transition: 0.2s; }  
+        .dropdown a:hover { background: #151515; color: var(--primary); padding-right: 25px; }  
 
         /* --- السلايدر --- */  
         .slider-container { max-width: 1620px; margin: 20px auto; padding: 0 40px; }  
-        #heroSection { width: 100%; height: 450px; position: relative; overflow: hidden; border-radius: 15px; border: 1px solid var(--border-color); }  
+        #heroSection { width: 100%; height: 420px; position: relative; overflow: hidden; border-radius: 15px; border: 1px solid var(--border-color); background: #000; }  
         .slider-wrapper { display: flex; width: 100%; height: 100%; transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); }  
         .slide { min-width: 100%; height: 100%; background-size: cover; background-position: center; position: relative; }  
-        .slide-overlay { position: absolute; inset: 0; background: linear-gradient(to top, var(--bg-dark) 10%, transparent 80%); display: flex; flex-direction: column; justify-content: flex-end; padding: 50px; }  
+        .slide-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(7,7,7,1) 5%, transparent 70%); display: flex; flex-direction: column; justify-content: flex-end; padding: 40px; }  
+
+        /* --- وضع المطور والأدوات --- */
+        .edit-mode-enabled .delete-item-btn { display: flex !important; }
+        .delete-item-btn { 
+            position: absolute; top: 5px; left: 5px; background: var(--netflix-red); 
+            color: white; width: 22px; height: 22px; border-radius: 50%; 
+            display: none; align-items: center; justify-content: center; z-index: 500; cursor: pointer; 
+        }
+
+        /* --- المودالات --- */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 5000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+        .modal-content { background: #111; padding: 30px; border-radius: 15px; width: 90%; max-width: 500px; border: 1px solid var(--primary); }
+        .modal-content input, .modal-content textarea { width: 100%; padding: 12px; margin-bottom: 10px; background: #000; border: 1px solid #333; color: white; border-radius: 5px; }
+
+        /* --- الهيكل الرئيسي --- */
+        .container { padding: 20px 40px; display: grid; grid-template-columns: 280px 1fr 280px; gap: 25px; max-width: 1700px; margin: 0 auto; }  
+        .section-box { margin-bottom: 50px; position: relative; }  
+        .section-title { background: #111; padding: 12px 20px; font-size: 17px; font-weight: bold; margin-bottom: 20px; border-right: 5px solid var(--primary); display: flex; align-items: center; justify-content: space-between; }  
         
-        /* --- كارت المحتوى --- */  
         .grid-display { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }  
-        .item-card { background: var(--card-bg); border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); transition: 0.4s ease; cursor: pointer; position: relative; }  
-        .item-card:hover { transform: translateY(-10px); border-color: var(--primary); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }  
-        .item-card img { width: 100%; height: 270px; object-fit: cover; }  
-        
-        .delete-btn { position: absolute; top: 10px; left: 10px; background: rgba(229, 9, 20, 0.9); color: white; width: 25px; height: 25px; border-radius: 50%; display: none; align-items: center; justify-content: center; z-index: 10; cursor: pointer; }
-        .edit-mode-enabled .delete-btn { display: flex; }
+        .item-card { background: var(--card-bg); border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); transition: 0.4s ease; cursor: pointer; position: relative; }  
+        .item-card:hover { transform: scale(1.05); border-color: var(--primary); }  
+        .item-card img { width: 100%; height: 260px; object-fit: cover; }  
 
-        /* --- المودال (نافذة التعديل) --- */  
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 5000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .modal-content { background: #151515; padding: 30px; border-radius: 15px; width: 90%; max-width: 500px; border: 1px solid var(--primary); }
-        .modal-content h3 { margin-bottom: 20px; color: var(--primary); }
-        .modal-content input, .modal-content textarea { width: 100%; padding: 12px; margin-bottom: 15px; background: #000; border: 1px solid #333; color: white; border-radius: 8px; outline: none; }
-        .modal-actions { display: flex; gap: 10px; }
-        .btn { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .btn-save { background: var(--primary); color: white; }
-        .btn-cancel { background: #333; color: white; }
+        .sidebar { background: #111; border: 1px solid var(--border-color); border-radius: 8px; height: fit-content; position: sticky; top: 90px; }  
+        .side-title { background: #1a1a1a; color: var(--primary); font-size: 13px; font-weight: bold; padding: 12px; border-bottom: 1px solid var(--border-color); text-align: center; }  
+        .side-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #1a1a1a; cursor: pointer; }  
+        .side-item img { width: 45px; height: 65px; border-radius: 4px; object-fit: cover; }  
 
-        /* --- وضع المطور --- */
-        .dev-controls { display: none; position: fixed; bottom: 20px; right: 20px; z-index: 4000; flex-direction: column; gap: 10px; }
-        .edit-mode-enabled .dev-controls { display: flex; }
-        .fab { width: 50px; height: 50px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-
-        .container { padding: 20px 40px; display: grid; grid-template-columns: 280px 1fr 280px; gap: 25px; }
-        @media (max-width: 1100px) { .container { grid-template-columns: 1fr; } .sidebar { display: none; } }
+        @media (max-width: 1200px) { .container { grid-template-columns: 1fr; } .sidebar { display: none; } }  
     </style>
-</head>  
-<body class="">
+</head>
+<body>
 
 <header class="header">  
-    <a href="index.html" class="logo-ctn">  
+    <a href="#" class="logo-ctn">  
         <img src="https://i.ibb.co/5ggRsXdV/Red-Black-Modern-Movie-Cinema-Presentation-20260311-124846.jpg">  
         <span style="font-weight: bold; font-size: 22px;">WATCH<span id="logoAccent" style="color: var(--primary);">GO</span></span>  
     </a>  
+    <nav class="main-nav">  
+        <div class="nav-item"><a class="nav-link" href="#">الرئيسية</a></div>  
+        <div class="nav-item">  
+            <span class="nav-link">الأفلام <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i></span>  
+            <div class="dropdown">  
+                <a href="#" onclick="showFull('discover/movie', 'أفلام مصرية', 'egypt')">أفلام مصرية</a>  
+                <a href="#" onclick="showFull('discover/movie', 'أفلام أجنبية', 'en')">أفلام أجنبية</a>  
+            </div>  
+        </div>  
+        <div class="nav-item"><a class="nav-link" href="#">المسلسلات</a></div>  
+    </nav>  
     <div class="header-icons">  
-        <i class="fa-solid fa-palette icon-btn" onclick="openColorModal()" title="تغيير الثيم"></i>
-        <i class="fa-solid fa-gear icon-btn" id="toggleEditBtn" title="وضع المطور"></i>
+        <i class="fa-solid fa-palette icon-btn" onclick="openModal('colorModal')"></i>
+        <i class="fa-solid fa-gear icon-btn" onclick="toggleEditMode()"></i>  
         <i class="fa-solid fa-magnifying-glass icon-btn" onclick="toggleSearch()"></i>  
     </div>  
 </header>  
 
-<div class="slider-container">  
+<div class="slider-container" id="sliderArea">  
     <div id="heroSection"><div class="slider-wrapper" id="sliderWrapper"></div></div>  
 </div>  
 
-<div class="container">
-    <aside class="sidebar">
-        <div class="section-title">أعلى التقييمات</div>
-        <div id="sideRatings" class="side-list"></div>
-    </aside>
+<div class="container">  
+    <aside class="sidebar">  
+        <div class="side-title">أعلى التقييمات</div>  
+        <div class="side-list" id="bestMoviesSide"></div>  
+    </aside>  
 
-    <main id="mainCol">
-        <section class="section-box" data-key="ramadan">
-            <div class="section-title">مسلسلات رمضان 2026</div>
-            <div class="grid-display" id="ramadanGrid"></div>
-        </section>
+    <main class="main-col" id="mainCol">  
+        <div id="sectionsContainer">
+            <section class="section-box" data-key="ramadan">  
+                <div class="section-title"><span>مسلسلات رمضان 2026</span></div>  
+                <div class="grid-display" id="ramadanGrid"></div>  
+            </section>  
 
-        <section class="section-box" data-key="egypt">
-            <div class="section-title">أفلام مصرية</div>
-            <div class="grid-display" id="egyptGrid"></div>
-        </section>
-
+            <section class="section-box" data-key="egypt">  
+                <div class="section-title"><span>الأفلام المصرية</span></div>  
+                <div class="grid-display" id="egyptGrid"></div>  
+            </section>  
+        </div>
         <div id="extraSections"></div>
-    </main>
+    </main>  
 
-    <aside class="sidebar">
-        <div class="section-title">عالم الأنمي</div>
-        <div id="sideAnime" class="side-list"></div>
-    </aside>
+    <aside class="sidebar">  
+        <div class="side-title">عالم الأنمي</div>  
+        <div class="side-list" id="animeSide"></div>  
+    </aside>  
 </div>
 
-<div id="movieModal" class="modal">
+<div id="addMovieModal" class="modal">
     <div class="modal-content">
         <h3>إضافة محتوى مخصص</h3>
         <input type="text" id="mTitle" placeholder="عنوان الفيلم">
-        <textarea id="mStory" placeholder="قصة الفيلم"></textarea>
-        <input type="text" id="mYear" placeholder="السنة">
-        <input type="text" id="mRate" placeholder="التقييم">
-        <input type="text" id="mImg" placeholder="رابط صورة البوستر">
-        <div class="modal-actions">
-            <button class="btn btn-save" onclick="saveCustomMovie()">حفظ</button>
-            <button class="btn btn-cancel" onclick="closeModals()">إلغاء</button>
+        <textarea id="mStory" placeholder="وصف الفيلم"></textarea>
+        <input type="text" id="mImg" placeholder="رابط الصورة (Poster URL)">
+        <div style="display:flex; gap:10px;">
+            <button onclick="saveMovie()" style="flex:1; padding:10px; background:var(--primary); border:none; color:white; cursor:pointer;">حفظ</button>
+            <button onclick="closeModal('addMovieModal')" style="flex:1; padding:10px; background:#333; border:none; color:white; cursor:pointer;">إلغاء</button>
         </div>
     </div>
 </div>
 
 <div id="colorModal" class="modal">
     <div class="modal-content">
-        <h3>اختر اللون الأساسي</h3>
-        <input type="color" id="themeColor" value="#9b51e0" style="height: 100px; cursor: pointer;">
-        <div class="modal-actions">
-            <button class="btn btn-save" onclick="applyTheme()">تطبيق</button>
-            <button class="btn btn-cancel" onclick="closeModals()">إلغاء</button>
-        </div>
+        <h3>اختر لون الموقع الأساسي</h3>
+        <input type="color" id="colorPicker" style="height:100px; cursor:pointer;">
+        <button onclick="applyColor()" style="width:100%; padding:10px; background:var(--primary); border:none; color:white; margin-top:10px;">تطبيق اللون</button>
     </div>
-</div>
-
-<div class="dev-controls">
-    <div class="fab" onclick="openAddSection()" title="إضافة قسم جديد"><i class="fa-solid fa-folder-plus"></i></div>
 </div>
 
 <script>
     const API_KEY = 'AKfycbw4GkkBMwuUqmeMBYUNV1u0LvQvMla1MgM6ActKpZsdhVvPUnUqdi1StaL_1KkEgniV2A';
     const BASE_URL = `https://script.google.com/macros/s/${API_KEY}/exec`;
-    
+
     let state = {
         editMode: false,
-        primaryColor: localStorage.getItem('wg_color') || '#9b51e0',
-        customMovies: JSON.parse(localStorage.getItem('wg_movies')) || {},
+        activeSection: '',
+        customMovies: JSON.parse(localStorage.getItem('wg_custom')) || {},
         hiddenItems: JSON.parse(localStorage.getItem('wg_hidden')) || [],
-        extraSections: JSON.parse(localStorage.getItem('wg_sections')) || [],
-        pages: { ramadan: 1, egypt: 1, global: 1 },
-        activeSection: null
+        extraSections: JSON.parse(localStorage.getItem('wg_extra_sec')) || [],
+        pages: { ramadan: 1, egypt: 1 },
+        color: localStorage.getItem('wg_theme_color') || '#9b51e0'
     };
 
-    // --- البداية ---
     function init() {
-        document.documentElement.style.setProperty('--primary', state.primaryColor);
-        loadAPIContent('ramadan', 'discover/tv', 'ramadanGrid', '&with_original_language=ar&first_air_date_year=2026');
-        loadAPIContent('egypt', 'discover/movie', 'egyptGrid', '&with_origin_country=EG&with_original_language=ar');
+        document.documentElement.style.setProperty('--primary', state.color);
+        loadContent('ramadan', 'discover/tv', 'ramadanGrid', '&with_original_language=ar&first_air_date_year=2026');
+        loadContent('egypt', 'discover/movie', 'egyptGrid', '&with_origin_country=EG&with_original_language=ar');
         loadSlider();
+        loadSidebars();
         renderExtraSections();
         setupInfiniteScroll();
     }
 
-    // --- تحميل البيانات ---
-    async function loadAPIContent(key, endpoint, gridId, params = "") {
-        try {
-            const res = await fetch(`${BASE_URL}?endpoint=${endpoint}${params}&page=${state.pages[key]}`);
-            const data = await res.json();
-            const grid = document.getElementById(gridId);
-            
-            let html = state.pages[key] === 1 ? renderCustomCards(key) : '';
-            data.results.forEach(m => {
-                if (!state.hiddenItems.includes(m.id.toString())) {
-                    html += createMovieCard(m, endpoint.includes('tv') ? 'tv' : 'movie');
-                }
-            });
-            
-            if (state.pages[key] === 1) grid.innerHTML = html;
-            else grid.insertAdjacentHTML('beforeend', html);
-        } catch (e) { console.log("Error loading content"); }
+    async function loadContent(key, endpoint, gridId, params = "") {
+        const res = await fetch(`${BASE_URL}?endpoint=${endpoint}${params}&page=${state.pages[key]}`);
+        const data = await res.json();
+        const grid = document.getElementById(gridId);
+        
+        let html = state.pages[key] === 1 ? renderCustom(key) : '';
+        data.results.forEach(m => {
+            if(!state.hiddenItems.includes(m.id.toString())) {
+                html += createCard(m, endpoint.includes('tv') ? 'tv' : 'movie');
+            }
+        });
+        
+        if(state.pages[key] === 1) grid.innerHTML = html;
+        else grid.insertAdjacentHTML('beforeend', html);
     }
 
-    function createMovieCard(m, type, isCustom = false) {
-        const id = m.id;
-        const title = m.title || m.name;
+    function createCard(m, type, isCustom = false) {
+        const id = isCustom ? m.id : m.id;
         const img = isCustom ? m.img : `https://image.tmdb.org/t/p/w500${m.poster_path}`;
+        const title = m.title || m.name;
         return `
             <div class="item-card" data-id="${id}">
-                <div class="delete-btn" onclick="deleteItem('${id}', event)">×</div>
-                <img src="${img}" alt="${title}" onclick="location.href='movie.html?id=${id}&type=${type}'">
+                <div class="delete-item-btn" onclick="hideItem('${id}', event)">×</div>
+                <img src="${img}" onclick="location.href='movie.html?id=${id}&type=${type}'">
                 <div style="padding:10px; font-size:12px; text-align:center;">${title}</div>
-            </div>
-        `;
+            </div>`;
     }
 
-    // --- نظام التمرير اللانهائي ---
-    function setupInfiniteScroll() {
-        window.onscroll = () => {
-            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
-                // تحميل المزيد للقسم الرئيسي (مثلاً الأحدث)
-                state.pages.egypt++;
-                loadAPIContent('egypt', 'discover/movie', 'egyptGrid', '&with_origin_country=EG&with_original_language=ar');
-            }
-        };
-    }
-
-    // --- وضع المطور والتعديلات ---
-    document.getElementById('toggleEditBtn').onclick = () => {
+    // --- ميزات وضع المطور ---
+    function toggleEditMode() {
         state.editMode = !state.editMode;
         document.body.classList.toggle('edit-mode-enabled');
-        alert(state.editMode ? "تم تفعيل وضع المطور" : "تم إيقاف وضع المطور");
-        attachAddButtons();
-    };
-
-    function deleteItem(id, event) {
-        event.stopPropagation();
-        state.hiddenItems.push(id.toString());
-        localStorage.setItem('wg_hidden', JSON.stringify(state.hiddenItems));
-        document.querySelector(`[data-id="${id}"]`).remove();
+        updateDevUI();
     }
 
-    // --- إدارة الأقسام المخصصة ---
-    function openAddSection() {
-        const title = prompt("عنوان القسم الجديد:");
-        if (title) {
-            const key = 'custom_' + Date.now();
-            state.extraSections.push({ key, title });
-            localStorage.setItem('wg_sections', JSON.stringify(state.extraSections));
-            renderExtraSections();
-        }
-    }
-
-    function renderExtraSections() {
-        const container = document.getElementById('extraSections');
-        container.innerHTML = state.extraSections.map(s => `
-            <section class="section-box" data-key="${s.key}">
-                <div class="section-title">${s.title} <i class="fa-solid fa-trash" style="font-size:12px; cursor:pointer;" onclick="removeSection('${s.key}')"></i></div>
-                <div class="grid-display" id="grid_${s.key}">${renderCustomCards(s.key)}</div>
-            </section>
-        `).join('');
-        attachAddButtons();
-    }
-
-    function attachAddButtons() {
-        document.querySelectorAll('.section-box').forEach(sec => {
-            if (state.editMode && !sec.querySelector('.add-movie-btn')) {
+    function updateDevUI() {
+        document.querySelectorAll('.section-title').forEach(st => {
+            if(state.editMode && !st.querySelector('.add-btn')) {
                 const btn = document.createElement('button');
-                btn.className = 'btn btn-save add-movie-btn';
-                btn.style.margin = "10px 0";
-                btn.innerHTML = "+ إضافة فيلم لهذا القسم";
-                btn.onclick = () => { state.activeSection = sec.dataset.key; document.getElementById('movieModal').style.display='flex'; };
-                sec.appendChild(btn);
+                btn.className = 'add-btn';
+                btn.innerHTML = '+ إضافة';
+                btn.style = "background:var(--primary); color:white; border:none; padding:4px 10px; cursor:pointer; font-size:12px;";
+                btn.onclick = () => { state.activeSection = st.parentElement.dataset.key; openModal('addMovieModal'); };
+                st.appendChild(btn);
             }
         });
     }
 
-    function saveCustomMovie() {
+    function hideItem(id, e) {
+        e.stopPropagation();
+        state.hiddenItems.push(id.toString());
+        localStorage.setItem('wg_hidden', JSON.stringify(state.hiddenItems));
+        document.querySelector(`[data-id="${id}"]`).style.display = 'none';
+    }
+
+    function saveMovie() {
         const movie = {
             id: 'c' + Date.now(),
             title: document.getElementById('mTitle').value,
-            img: document.getElementById('mImg').value,
-            year: document.getElementById('mYear').value
+            img: document.getElementById('mImg').value
         };
-        if (!state.customMovies[state.activeSection]) state.customMovies[state.activeSection] = [];
+        if(!state.customMovies[state.activeSection]) state.customMovies[state.activeSection] = [];
         state.customMovies[state.activeSection].push(movie);
-        localStorage.setItem('wg_movies', JSON.stringify(state.customMovies));
-        location.reload(); 
+        localStorage.setItem('wg_custom', JSON.stringify(state.customMovies));
+        location.reload();
     }
 
-    function renderCustomCards(key) {
-        if (!state.customMovies[key]) return '';
-        return state.customMovies[key].map(m => createMovieCard(m, 'movie', true)).join('');
+    function renderCustom(key) {
+        if(!state.customMovies[key]) return '';
+        return state.customMovies[key].map(m => createCard(m, 'movie', true)).join('');
     }
 
-    // --- ثيم الألوان ---
-    function openColorModal() { document.getElementById('colorModal').style.display='flex'; }
-    function applyTheme() {
-        const color = document.getElementById('themeColor').value;
-        state.primaryColor = color;
-        localStorage.setItem('wg_color', color);
-        document.documentElement.style.setProperty('--primary', color);
-        closeModals();
+    // --- التمرير اللانهائي ---
+    function setupInfiniteScroll() {
+        window.onscroll = () => {
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 800) {
+                state.pages.egypt++;
+                loadContent('egypt', 'discover/movie', 'egyptGrid', '&with_origin_country=EG&with_original_language=ar');
+            }
+        };
     }
 
-    function closeModals() { document.querySelectorAll('.modal').forEach(m => m.style.display='none'); }
+    // --- وظائف إضافية ---
+    function applyColor() {
+        state.color = document.getElementById('colorPicker').value;
+        localStorage.setItem('wg_theme_color', state.color);
+        document.documentElement.style.setProperty('--primary', state.color);
+        closeModal('colorModal');
+    }
 
-    // --- السلايدر ---
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
     async function loadSlider() {
         const res = await fetch(`${BASE_URL}?endpoint=movie/popular`);
         const data = await res.json();
-        const wrapper = document.getElementById('sliderWrapper');
-        wrapper.innerHTML = data.results.slice(0, 5).map(m => `
+        document.getElementById('sliderWrapper').innerHTML = data.results.slice(0,5).map(m => `
             <div class="slide" style="background-image:url(https://image.tmdb.org/t/p/original${m.backdrop_path})">
-                <div class="slide-overlay">
-                    <h1 style="font-size:40px;">${m.title}</h1>
-                    <p style="max-width:600px; margin: 15px 0;">${m.overview.substring(0, 150)}...</p>
-                    <button class="btn btn-save" style="width:150px;">شاهد الآن</button>
-                </div>
-            </div>
-        `).join('');
+                <div class="slide-overlay"><h2>${m.title}</h2><button class="add-btn" style="width:100px; padding:10px; margin-top:10px;">شاهد الآن</button></div>
+            </div>`).join('');
+    }
+
+    async function loadSidebars() {
+        const top = await fetch(`${BASE_URL}?endpoint=movie/top_rated`);
+        const topData = await top.json();
+        document.getElementById('bestMoviesSide').innerHTML = topData.results.slice(0,6).map(m => `<div class="side-item"><img src="https://image.tmdb.org/t/p/w200${m.poster_path}"><span>${m.title}</span></div>`).join('');
+    }
+
+    function renderExtraSections() {
+        const container = document.getElementById('extraSections');
+        state.extraSections.forEach(s => {
+            container.innerHTML += `<section class="section-box" data-key="${s.key}"><div class="section-title"><span>${s.title}</span></div><div class="grid-display" id="grid_${s.key}">${renderCustom(s.key)}</div></section>`;
+        });
     }
 
     init();
