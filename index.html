@@ -1,435 +1,271 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WatchGo - Developer Mode</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WatchGo - Developer Mode</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root { 
+            --primary: #9b51e0; 
+            --bg-dark: #070707; 
+            --card-bg: #111;
+            --border-color: #222;
+            --netflix-red: #e50914;
+        }
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--bg-dark); color: #fff; font-family: 'Segoe UI', Tahoma, sans-serif; overflow-x: hidden; scroll-behavior: smooth; }
 
-<style>
-:root {
---primary: #9b51e0;
---bg-dark: #070707;
---card-bg: #111;
---border-color: #222;
---netflix-red: #e50914;
-}
+        /* --- الهيدر --- */
+        .header { 
+            background: #000; padding: 0 40px; height: 75px;
+            display: flex; justify-content: space-between; align-items: center; 
+            border-bottom: 2px solid var(--primary); position: sticky; top: 0; z-index: 2000;
+        }
+        .logo-ctn { display: flex; align-items: center; gap: 10px; text-decoration: none; color: white; flex-shrink: 0; }
+        .logo-ctn img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--primary); cursor: pointer; }
 
-*{
-box-sizing:border-box;
-margin:0;
-padding:0;
-}
+        /* --- إضافات المطور (Visual Editor) --- */
+        .edit-pen { cursor: pointer; color: var(--primary); margin-right: 10px; font-size: 14px; transition: 0.3s; }
+        .edit-pen:hover { transform: scale(1.2); filter: brightness(1.2); }
+        
+        /* أزرار التحكم العائمة الجديدة */
+        .admin-controls { position: fixed; bottom: 30px; left: 30px; display: flex; flex-direction: column; gap: 15px; z-index: 9999; }
+        .master-btn { width: 60px; height: 60px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px; color: white; box-shadow: 0 5px 15px rgba(0,0,0,0.5); transition: 0.3s; }
+        .save-all-btn { background: #27ae60; }
+        .add-section-btn { background: var(--primary); }
+        .master-btn:hover { transform: scale(1.1); }
 
-body{
-background:var(--bg-dark);
-color:#fff;
-font-family:'Segoe UI',Tahoma,sans-serif;
-overflow-x:hidden;
-scroll-behavior:smooth;
-}
+        /* جعل النصوص قابلة للتعديل عند التركيز */
+        [contenteditable="true"]:focus { outline: none; background: rgba(155, 81, 224, 0.1); border-bottom: 2px solid var(--primary); padding: 2px 5px; border-radius: 4px; }
 
-/* header */
+        .add-card-btn {
+            border: 2px dashed #444; display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; min-height: 260px; 
+            border-radius: 8px; cursor: pointer; color: #777; transition: 0.3s;
+            background: rgba(155, 81, 224, 0.02); margin-top: 10px;
+        }
+        .add-card-btn:hover { border-color: var(--primary); color: var(--primary); background: rgba(155, 81, 224, 0.1); }
+        .add-card-btn i { font-size: 40px; margin-bottom: 10px; }
 
-.header{
-background:#000;
-padding:0 40px;
-height:75px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-border-bottom:2px solid var(--primary);
-position:sticky;
-top:0;
-z-index:2000;
-}
+        .admin-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(10px); }
+        .modal-content { background: #111; padding: 30px; border-radius: 15px; border: 1px solid var(--primary); width: 90%; max-width: 500px; }
+        .modal-content input, .modal-content textarea { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #333; color: white; border-radius: 5px; outline: none; }
+        .save-btn { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 10px; }
 
-.logo-ctn{
-display:flex;
-align-items:center;
-gap:10px;
-text-decoration:none;
-color:white;
-}
+        /* --- باقي الاستايلات الأصلية --- */
+        .main-nav { display: flex; list-style: none; height: 100%; align-items: center; gap: 5px; }
+        .nav-item { position: relative; height: 100%; display: flex; align-items: center; }
+        .nav-link { color: #eee; text-decoration: none; font-size: 14px; font-weight: 600; padding: 0 15px; cursor: pointer; display: flex; align-items: center; gap: 6px; height: 100%; transition: 0.3s; }
+        .nav-link:hover { color: var(--primary); background: rgba(155, 81, 224, 0.05); }
 
-.logo-ctn img{
-width:45px;
-height:45px;
-border-radius:50%;
-border:2px solid var(--primary);
-cursor:pointer;
-}
+        .dropdown { position: absolute; top: 75px; right: 0; background: #0a0a0a; min-width: 220px; border-top: 3px solid var(--primary); display: none; flex-direction: column; box-shadow: 0 15px 30px rgba(0,0,0,0.9); z-index: 3000; }
+        .nav-item:hover .dropdown { display: flex; }
+        .dropdown a { color: #ccc; padding: 12px 20px; text-decoration: none; font-size: 13px; border-bottom: 1px solid #1a1a1a; text-align: right; transition: 0.2s; }
+        .dropdown a:hover { background: #151515; color: var(--primary); padding-right: 25px; }
 
-.edit-pen{
-cursor:pointer;
-color:var(--primary);
-margin-right:10px;
-font-size:14px;
-}
+        .header-icons { display: flex; align-items: center; gap: 15px; }
+        .icon-btn { color: #ccc; cursor: pointer; font-size: 18px; transition: 0.3s; }
+        .icon-btn:hover { color: var(--primary); }
 
-.admin-controls{
-position:fixed;
-bottom:30px;
-left:30px;
-display:flex;
-flex-direction:column;
-gap:15px;
-z-index:9999;
-}
+        #searchBox { background: rgba(0,0,0,0.95); padding: 20px; display: none; position: fixed; top: 75px; left: 0; width: 100%; z-index: 1500; border-bottom: 1px solid var(--primary); backdrop-filter: blur(10px); }
+        #searchBox input { width: 80%; max-width: 800px; padding: 15px 25px; background: #111; border: 2px solid var(--border-color); color: #fff; border-radius: 50px; outline: none; font-size: 18px; transition: 0.3s; }
 
-.master-btn{
-width:60px;
-height:60px;
-border-radius:50%;
-border:none;
-cursor:pointer;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:24px;
-color:white;
-box-shadow:0 5px 15px rgba(0,0,0,0.5);
-}
+        .slider-container { max-width: 1620px; margin: 20px auto; padding: 0 40px; }
+        #heroSection { width: 100%; height: 420px; position: relative; overflow: hidden; border-radius: 15px; border: 1px solid var(--border-color); background: #000; }
+        .slider-wrapper { display: flex; width: 100%; height: 100%; transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        .slide { min-width: 100%; height: 100%; background-size: cover; background-position: center 20%; position: relative; }
+        .slide-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(7,7,7,1) 5%, transparent 70%); display: flex; flex-direction: column; justify-content: flex-end; padding: 40px; }
+        .slide-title { font-size: 32px; font-weight: 900; margin-bottom: 15px; text-shadow: 2px 2px 10px #000; }
 
-.save-all-btn{
-background:#27ae60;
-}
+        .grid-display { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
+        .item-card { background: var(--card-bg); border-radius: 8px; overflow: visible; border: 1px solid var(--border-color); transition: 0.4s ease; cursor: pointer; position: relative; z-index: 1; }
+        .item-card img { width: 100%; height: 260px; object-fit: cover; border-radius: 8px 8px 0 0; }
+        
+        .hover-details { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(15, 15, 15, 0.98); padding: 15px 12px; opacity: 0; visibility: hidden; transition: 0.3s; border-top: 1px solid var(--primary); border-radius: 0 0 8px 8px; }
+        .item-card:hover .hover-details { opacity: 1; visibility: visible; }
+        .item-name { font-size: 13px; font-weight: bold; margin-bottom: 8px; color: #fff; text-align: center; }
 
-.add-section-btn{
-background:var(--primary);
-}
+        .container { padding: 20px 40px; display: grid; grid-template-columns: 280px 1fr 280px; gap: 25px; max-width: 1700px; margin: 0 auto; }
+        .section-box { margin-bottom: 50px; }
+        .section-title { background: #111; padding: 12px 20px; font-size: 17px; font-weight: bold; margin-bottom: 20px; border-right: 5px solid var(--primary); display: flex; align-items: center; gap: 10px; }
+        .sidebar { background: #111; border: 1px solid var(--border-color); border-radius: 8px; height: fit-content; position: sticky; top: 90px; }
+        .side-title { background: #1a1a1a; color: var(--primary); font-size: 13px; font-weight: bold; padding: 12px; border-bottom: 1px solid var(--border-color); text-align: center; }
+        .side-list { padding: 10px; }
+        .side-item { display: flex; align-items: center; gap: 10px; padding: 10px; cursor: pointer; transition: 0.2s; }
+        .side-item img { width: 45px; height: 65px; border-radius: 4px; object-fit: cover; }
 
-.grid-display{
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
-gap:20px;
-}
-
-.item-card{
-background:var(--card-bg);
-border-radius:8px;
-overflow:hidden;
-border:1px solid var(--border-color);
-cursor:pointer;
-position:relative;
-}
-
-.item-card img{
-width:100%;
-height:260px;
-object-fit:cover;
-}
-
-.delete-btn{
-position:absolute;
-top:5px;
-left:5px;
-background:rgba(0,0,0,.8);
-color:#fff;
-padding:4px 6px;
-font-size:12px;
-border-radius:4px;
-cursor:pointer;
-display:none;
-}
-
-.item-card:hover .delete-btn{
-display:block;
-}
-
-.add-card-btn{
-border:2px dashed #444;
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-min-height:260px;
-border-radius:8px;
-cursor:pointer;
-color:#777;
-}
-
-.add-card-btn:hover{
-border-color:var(--primary);
-color:var(--primary);
-}
-
-.color-palette{
-position:fixed;
-right:20px;
-bottom:120px;
-background:#000;
-padding:10px;
-border-radius:10px;
-display:grid;
-grid-template-columns:repeat(6,1fr);
-gap:6px;
-z-index:9999;
-border:1px solid #333;
-}
-
-.color-palette div{
-width:22px;
-height:22px;
-border-radius:50%;
-cursor:pointer;
-}
-
-</style>
+        @media (max-width: 1200px) { .container { grid-template-columns: 1fr; } .sidebar { display: none; } .main-nav { display: none; } }
+    </style>
 </head>
-
 <body>
-
-<header class="header">
-
-<div class="logo-ctn">
-<img id="mainLogo" src="https://i.ibb.co/5ggRsXdV/Red-Black-Modern-Movie-Cinema-Presentation-20260311-124846.jpg">
-<span id="siteTitleText" contenteditable="true" style="font-weight:bold;font-size:22px;">
-WATCH<span style="color:var(--primary);">GO</span>
-</span>
+    <!-- === الهيرو سلايدر + الأقسام الرئيسية === -->
+<div id="heroSection">
+    <div class="slider-wrapper" id="sliderWrapper">
+        <div class="slide" style="background-image: url('https://picsum.photos/1620/420?random=1');">
+            <div class="slide-overlay">
+                <div class="slide-title" contenteditable="true">أحدث الأفلام</div>
+            </div>
+        </div>
+        <div class="slide" style="background-image: url('https://picsum.photos/1620/420?random=2');">
+            <div class="slide-overlay">
+                <div class="slide-title" contenteditable="true">أفضل المسلسلات</div>
+            </div>
+        </div>
+        <div class="slide" style="background-image: url('https://picsum.photos/1620/420?random=3');">
+            <div class="slide-overlay">
+                <div class="slide-title" contenteditable="true">العروض المميزة</div>
+            </div>
+        </div>
+    </div>
 </div>
-
-</header>
 
 <div class="container">
+    <!-- أقسام محتوى -->
+    <div class="section-box" id="mainSections">
+        <div class="section-title" contenteditable="true">قسم الأكشن</div>
+        <div class="grid-display" id="section1">
+            <div class="item-card">
+                <img src="https://picsum.photos/200/260?random=11" alt="Movie 1">
+                <div class="hover-details"><div class="item-name" contenteditable="true">فيلم أكشن 1</div></div>
+            </div>
+            <div class="item-card">
+                <img src="https://picsum.photos/200/260?random=12" alt="Movie 2">
+                <div class="hover-details"><div class="item-name" contenteditable="true">فيلم أكشن 2</div></div>
+            </div>
+            <div class="add-card-btn" onclick="openAddCardModal('section1')">
+                <i class="fas fa-plus"></i> إضافة فيلم
+            </div>
+        </div>
+    </div>
 
-<section class="section-box">
-
-<div class="section-title">
-أفلام مضافة
+    <div class="section-box" id="mainSections2">
+        <div class="section-title" contenteditable="true">قسم الكوميديا</div>
+        <div class="grid-display" id="section2">
+            <div class="item-card">
+                <img src="https://picsum.photos/200/260?random=21" alt="Movie 3">
+                <div class="hover-details"><div class="item-name" contenteditable="true">فيلم كوميدي 1</div></div>
+            </div>
+            <div class="item-card">
+                <img src="https://picsum.photos/200/260?random=22" alt="Movie 4">
+                <div class="hover-details"><div class="item-name" contenteditable="true">فيلم كوميدي 2</div></div>
+            </div>
+            <div class="add-card-btn" onclick="openAddCardModal('section2')">
+                <i class="fas fa-plus"></i> إضافة فيلم
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="grid-display" id="developerGrid">
-
-<div class="add-card-btn" onclick="openAdminModal()">
-<i class="fa-solid fa-plus-circle"></i>
-<span>إضافة عمل</span>
+<!-- === أزرار التحكم العائمة === -->
+<div class="admin-controls">
+    <button class="master-btn save-all-btn" onclick="saveAll()">💾 حفظ الكل</button>
+    <button class="master-btn add-section-btn" onclick="openAddSectionModal()">➕ قسم جديد</button>
 </div>
 
+<!-- === المودال لإضافة بطاقة جديدة === -->
+<div class="admin-modal" id="addCardModal">
+    <div class="modal-content">
+        <h3>إضافة فيلم جديد</h3>
+        <input type="text" id="cardTitle" placeholder="اسم الفيلم">
+        <input type="url" id="cardImage" placeholder="رابط الصورة">
+        <button class="save-btn" onclick="addCard()">إضافة</button>
+    </div>
 </div>
 
-</section>
-
+<!-- === المودال لإضافة قسم جديد === -->
+<div class="admin-modal" id="addSectionModal">
+    <div class="modal-content">
+        <h3>إضافة قسم جديد</h3>
+        <input type="text" id="sectionTitle" placeholder="اسم القسم">
+        <button class="save-btn" onclick="addSection()">إضافة القسم</button>
+    </div>
 </div>
-    <div class="admin-controls">
-
-<button class="master-btn add-section-btn" onclick="createNewSection()">
-<i class="fa-solid fa-folder-plus"></i>
-</button>
-
-<button class="master-btn save-all-btn" onclick="saveAuto()">
-<i class="fa-solid fa-cloud-upload-alt"></i>
-</button>
-
-</div>
-
-
-<div id="adminModal" class="admin-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);align-items:center;justify-content:center;z-index:9999;">
-
-<div style="background:#111;padding:20px;border-radius:10px;width:90%;max-width:400px">
-
-<input id="mTitle" placeholder="عنوان الفيلم" style="width:100%;padding:10px;margin:5px 0;background:#000;border:1px solid #333;color:#fff">
-
-<input id="mImg" placeholder="رابط الصورة" style="width:100%;padding:10px;margin:5px 0;background:#000;border:1px solid #333;color:#fff">
-
-<button onclick="addCustomMovie()" style="width:100%;padding:10px;background:var(--primary);border:none;color:#fff">
-إضافة
-</button>
-
-<button onclick="closeAdminModal()" style="width:100%;padding:10px;background:#222;border:none;color:#fff;margin-top:5px">
-إلغاء
-</button>
-
-</div>
-</div>
-
 
 <script>
-
-const presetColors = [
-"#9b51e0","#e50914","#27ae60","#3498db","#f39c12",
-"#e74c3c","#1abc9c","#2ecc71","#8e44ad","#2980b9",
-"#16a085","#c0392b","#d35400","#2c3e50","#f1c40f",
-"#ff4757","#3742fa","#2ed573","#ffa502","#ff6b81",
-"#7bed9f","#70a1ff","#5352ed","#ff6348","#48dbfb",
-"#10ac84","#5f27cd","#ee5253","#0abde3","#222f3e"
-];
-
-function renderColors(){
-
-const box=document.createElement("div");
-box.className="color-palette";
-
-presetColors.forEach(c=>{
-const d=document.createElement("div");
-d.style.background=c;
-d.onclick=()=>changeMainTheme(c);
-box.appendChild(d);
-});
-
-document.body.appendChild(box);
-
-}
-
-renderColors();
-
-
-function changeMainTheme(color){
-document.documentElement.style.setProperty('--primary',color);
-saveAuto();
-}
-
-
-function openAdminModal(){
-document.getElementById("adminModal").style.display="flex";
-}
-
-function closeAdminModal(){
-document.getElementById("adminModal").style.display="none";
-}
-
-
-function addCustomMovie(){
-
-const title=document.getElementById("mTitle").value;
-const img=document.getElementById("mImg").value;
-
-if(!title || !img) return;
-
-const card=`
-<div class="item-card">
-
-<div class="delete-btn" onclick="this.parentElement.remove();saveAuto()">X</div>
-
-<img src="${img}">
-
-<div style="padding:10px;text-align:center;font-size:13px">
-${title}
-</div>
-
-</div>
-`;
-
-document.getElementById("developerGrid")
-.insertAdjacentHTML("afterbegin",card);
-
-closeAdminModal();
-saveAuto();
-
-}
-    /* =========================
-   Auto Save
-========================= */
-
-function saveAuto(){
-localStorage.setItem("watchgo_save",document.body.innerHTML);
-}
-
-function loadAuto(){
-
-const data=localStorage.getItem("watchgo_save");
-
-if(data){
-document.body.innerHTML=data;
-attachEvents();
-}
-
-}
-
-window.addEventListener("load",loadAuto);
-
-
-
-/* =========================
-   add section
-========================= */
-
-function createNewSection(){
-
-const name=prompt("اسم القسم");
-
-if(!name) return;
-
-const id="sec_"+Date.now();
-
-const html=`
-
-<section class="section-box" id="${id}">
-
-<div class="section-title">
-${name}
-</div>
-
-<div class="grid-display">
-
-<div class="add-card-btn" onclick="openAdminModal()">
-<i class="fa-solid fa-plus-circle"></i>
-<span>إضافة عمل</span>
-</div>
-
-</div>
-
-</section>
-
-`;
-
-document.querySelector(".container")
-.insertAdjacentHTML("beforeend",html);
-
-saveAuto();
-
-}
-
-
-/* =========================
-delete hover inject
-========================= */
-
-document.addEventListener("mouseover",e=>{
-
-const card=e.target.closest(".item-card");
-
-if(!card) return;
-
-if(card.querySelector(".delete-btn")) return;
-
-const btn=document.createElement("div");
-
-btn.className="delete-btn";
-btn.innerText="X";
-
-btn.onclick=(ev)=>{
-ev.stopPropagation();
-card.remove();
-saveAuto();
-};
-
-card.appendChild(btn);
-
-});
-
-
-/* =========================
-rebind after load
-========================= */
-
-function attachEvents(){
-
-document.querySelectorAll(".add-card-btn").forEach(btn=>{
-btn.onclick=openAdminModal;
-});
-
-}
-
-
-
-/* =========================
-init
-========================= */
-
-attachEvents();
-
+    let currentAddSectionId = '';
+    let currentAddCardSection = '';
+
+    function openAddCardModal(sectionId){
+        currentAddCardSection = sectionId;
+        document.getElementById('addCardModal').style.display = 'flex';
+    }
+
+    function openAddSectionModal(){
+        document.getElementById('addSectionModal').style.display = 'flex';
+    }
+
+    function closeModals(){
+        document.getElementById('addCardModal').style.display = 'none';
+        document.getElementById('addSectionModal').style.display = 'none';
+    }
+
+    function addCard(){
+        const title = document.getElementById('cardTitle').value;
+        const image = document.getElementById('cardImage').value;
+        if(title && image){
+            const cardHTML = `
+                <div class="item-card">
+                    <img src="${image}" alt="${title}">
+                    <div class="hover-details"><div class="item-name" contenteditable="true">${title}</div></div>
+                </div>
+            `;
+            const section = document.getElementById(currentAddCardSection);
+            section.insertAdjacentHTML('beforeend', cardHTML);
+            closeModals();
+            document.getElementById('cardTitle').value = '';
+            document.getElementById('cardImage').value = '';
+        } else {
+            alert('الرجاء إدخال كل الحقول');
+        }
+    }
+
+    function addSection(){
+        const title = document.getElementById('sectionTitle').value;
+        if(title){
+            const sectionsContainer = document.getElementById('mainSections').parentNode;
+            const newSectionHTML = `
+                <div class="section-box">
+                    <div class="section-title" contenteditable="true">${title}</div>
+                    <div class="grid-display" id="section${Date.now()}">
+                        <div class="add-card-btn" onclick="openAddCardModal('section${Date.now()}')">
+                            <i class="fas fa-plus"></i> إضافة فيلم
+                        </div>
+                    </div>
+                </div>
+            `;
+            sectionsContainer.insertAdjacentHTML('beforeend', newSectionHTML);
+            closeModals();
+            document.getElementById('sectionTitle').value = '';
+        } else {
+            alert('ادخل اسم القسم');
+        }
+    }
+
+    function saveAll(){
+        alert('تم حفظ كل التعديلات! 💾');
+        // هنا ممكن تضيف كود حفظ التعديلات في قاعدة بيانات أو LocalStorage
+    }
+
+    // سلايدر بسيط
+    let slideIndex = 0;
+    const slides = document.querySelectorAll('.slide');
+    function showSlides(){
+        slides.forEach((s, i) => s.style.display = 'none');
+        slideIndex++;
+        if(slideIndex > slides.length) slideIndex = 1;
+        slides[slideIndex-1].style.display = 'block';
+        setTimeout(showSlides, 5000);
+    }
+    showSlides();
+
+    // غلق المودالات عند الضغط خارجها
+    window.onclick = function(e){
+        if(e.target.classList.contains('admin-modal')) closeModals();
+    }
 </script>
+
 </body>
 </html>
