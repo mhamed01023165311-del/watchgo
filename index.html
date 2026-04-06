@@ -207,8 +207,6 @@
     </div>
 
     <script>
-        // التعديل هنا: شلنا الـ Key والـ URL ليكون الربط عبر البا
-        const API_KEY = '480fd49f76a6c9ada2b91fc2297c6af7'; 
         const BASE_URL = 'https://script.google.com/macros/s/AKfycbw4GkkBMwuUqmeMBYUNV1u0LvQvMla1MgM6ActKpZsdhVvPUnUqdi1StaL_1KkEgniV2A/exec';
 
         function toggleSearch() { 
@@ -223,7 +221,7 @@
             const date = m.release_date || m.first_air_date || '2026';
             const year = date.split('-')[0];
             
-            // شلنا الـ api_key من هنا
+            // الربط بالـ Apps Script لجلب تفاصيل الأفلام
             const resAr = await fetch(`${BASE_URL}?endpoint=${type}/${m.id}`);
             const arData = await resAr.json();
 
@@ -260,18 +258,17 @@
             document.getElementById('fullGrid').innerHTML = '<div class="no-results">جاري البحث...</div>';
 
             try {
-                // شلنا الـ api_key من هنا
                 const [movieRes, tvRes] = await Promise.all([
-                    fetch(`${BASE_URL}/search/movie?query=${query}&language=ar-SA`),
-                    fetch(`${BASE_URL}/search/tv?query=${query}&language=ar-SA`)
+                    fetch(`${BASE_URL}?endpoint=search/movie&query=${query}&language=ar-SA`),
+                    fetch(`${BASE_URL}?endpoint=search/tv&query=${query}&language=ar-SA`)
                 ]);
 
                 const movieData = await movieRes.json();
                 const tvData = await tvRes.json();
 
                 let combinedResults = [
-                    ...movieData.results.map(i => ({...i, media_type: 'movie'})),
-                    ...tvData.results.map(i => ({...i, media_type: 'tv'}))
+                    ...(movieData.results || []).map(i => ({...i, media_type: 'movie'})),
+                    ...(tvData.results || []).map(i => ({...i, media_type: 'tv'}))
                 ].filter(item => item.poster_path)
                  .sort((a, b) => b.popularity - a.popularity);
 
@@ -282,61 +279,61 @@
 
                 const cards = await Promise.all(combinedResults.map(m => createCard(m, m.media_type)));
                 document.getElementById('fullGrid').innerHTML = cards.join('');
-                document.getElementById('fullPag').innerHTML = '';
-
             } catch (err) {
                 document.getElementById('fullGrid').innerHTML = '<div class="no-results">حدث خطأ أثناء البحث، حاول مرة أخرى.</div>';
             }
         }
 
-        async function loadSection(url, gridId, pagId, type, cat = '', pageNum = 1) {
+        async function loadSection(urlPath, gridId, pagId, type, cat = '', pageNum = 1) {
             const sortParam = type === 'movie' ? '&sort_by=primary_release_date.desc' : '&sort_by=first_air_date.desc';
-            let finalUrl = `${url}${sortParam}&page=${pageNum}`;
+            let finalUrl = `${BASE_URL}?endpoint=${urlPath}${sortParam}&page=${pageNum}`;
             
             if(cat === 'egypt') finalUrl += `&with_origin_country=EG&with_original_language=ar`;
             else if(cat === 'arabic_only') finalUrl += `&with_original_language=ar&without_origin_country=EG`;
-            
-            const res = await fetch(finalUrl);
-            const data = await res.json();
-            
-            const data = await res.json();
-            const movies = data.results || data; // ده السطر "الجوكر" اللي هيحل الليلة
-            const cards = await Promise.all(movies.slice(0, 12).map(m => createCard(m, type)));
-            document.getElementById(gridId).innerHTML = cards.join('');
-            
-            let pagHtml = '';
-            for(let i=1; i<=Math.min(data.total_pages, 5); i++) {
-                pagHtml += `<button class="page-btn ${i === pageNum ? 'active' : ''}" onclick="loadSection('${url}', '${gridId}', '${pagId}', '${type}', '${cat}', ${i})">${i}</button>`;
-            }
-            document.getElementById(pagId).innerHTML = pagHtml;
+            else if(cat === 'ramadan') finalUrl += `&with_original_language=ar&first_air_date_year=2026`;
+
+            try {
+                const res = await fetch(finalUrl);
+                const data = await res.json();
+                const movies = data.results || []; 
+                const cards = await Promise.all(movies.slice(0, 12).map(m => createCard(m, type)));
+                document.getElementById(gridId).innerHTML = cards.join('');
+                
+                let pagHtml = '';
+                for(let i=1; i<=Math.min(data.total_pages || 1, 5); i++) {
+                    pagHtml += `<button class="page-btn ${i === pageNum ? 'active' : ''}" onclick="loadSection('${urlPath}', '${gridId}', '${pagId}', '${type}', '${cat}', ${i})">${i}</button>`;
+                }
+                document.getElementById(pagId).innerHTML = pagHtml;
+            } catch(e) { console.error("Error loading section:", e); }
         }
 
         async function init() {
-            // شلنا الـ api_key من كل الـ URLs
-            loadSection(`${BASE_URL}/discover/tv?with_original_language=ar&language=ar-SA&first_air_date_year=2026`, 'ramadanGrid', 'ramadanPag', 'tv');
-            loadSection(`${BASE_URL}/discover/movie?query=`, 'egyptGrid', 'egyptPag', 'movie', 'egypt');
-            loadSection(`${BASE_URL}/discover/movie?query=`, 'arabicGrid', 'arabicPag', 'movie', 'arabic_only');
-            loadSection(`${BASE_URL}/discover/movie?language=en-US`, 'moviesGrid', 'moviesPag', 'movie');
+            loadSection('discover/tv', 'ramadanGrid', 'ramadanPag', 'tv', 'ramadan');
+            loadSection('discover/movie', 'egyptGrid', 'egyptPag', 'movie', 'egypt');
+            loadSection('discover/movie', 'arabicGrid', 'arabicPag', 'movie', 'arabic_only');
+            loadSection('discover/movie', 'moviesGrid', 'moviesPag', 'movie');
 
-            const pop = await fetch(`${BASE_URL}/movie/now_playing?language=en-US`);
-            const pData = await pop.json();
-            renderSlider(pData.results.slice(0, 5));
+            try {
+                const pop = await fetch(`${BASE_URL}?endpoint=movie/now_playing&language=en-US`);
+                const pData = await pop.json();
+                renderSlider(pData.results.slice(0, 5));
 
-            const top = await fetch(`${BASE_URL}/movie/top_rated?language=ar-SA`);
-            const tData = await top.json();
-            document.getElementById('bestMoviesSide').innerHTML = tData.results.slice(0, 8).map(m => `
-                <div class="side-item" onclick="location.href='movie.html?id=${m.id}&type=movie'">
-                    <img src="https://image.tmdb.org/t/p/w200${m.poster_path}">
-                    <div class="txt" style="margin-right:10px">${m.title}</div>
-                </div>`).join('');
+                const top = await fetch(`${BASE_URL}?endpoint=movie/top_rated&language=ar-SA`);
+                const tData = await top.json();
+                document.getElementById('bestMoviesSide').innerHTML = tData.results.slice(0, 8).map(m => `
+                    <div class="side-item" onclick="location.href='movie.html?id=${m.id}&type=movie'">
+                        <img src="https://image.tmdb.org/t/p/w200${m.poster_path}">
+                        <div class="txt" style="margin-right:10px">${m.title}</div>
+                    </div>`).join('');
 
-            const ani = await fetch(`${BASE_URL}/discover/movie?with_genres=16&language=en-US&sort_by=primary_release_date.desc`);
-            const aniData = await ani.json();
-            document.getElementById('animeSide').innerHTML = aniData.results.slice(0, 8).map(m => `
-                <div class="side-item" onclick="location.href='movie.html?id=${m.id}&type=movie'">
-                    <img src="https://image.tmdb.org/t/p/w200${m.poster_path}">
-                    <div class="txt" style="margin-right:10px">${m.title}</div>
-                </div>`).join('');
+                const ani = await fetch(`${BASE_URL}?endpoint=discover/movie&with_genres=16&language=en-US`);
+                const aniData = await ani.json();
+                document.getElementById('animeSide').innerHTML = aniData.results.slice(0, 8).map(m => `
+                    <div class="side-item" onclick="location.href='movie.html?id=${m.id}&type=movie'">
+                        <img src="https://image.tmdb.org/t/p/w200${m.poster_path}">
+                        <div class="txt" style="margin-right:10px">${m.title}</div>
+                    </div>`).join('');
+            } catch(e) { console.error("Init failed:", e); }
         }
 
         function renderSlider(movies) {
@@ -358,8 +355,7 @@
             document.getElementById('fullTitle').innerText = title;
 
             const sortParam = endpoint.includes('tv') ? '&sort_by=first_air_date.desc' : '&sort_by=primary_release_date.desc';
-            // شلنا الـ api_key من هنا
-            let url = `${BASE_URL}/${endpoint}?${sortParam}&page=${page}`;
+            let url = `${BASE_URL}?endpoint=${endpoint}${sortParam}&page=${page}`;
             
             if(cat === 'egypt') url += `&with_origin_country=EG&with_original_language=ar`;
             else if(cat === 'arabic_only') url += `&with_original_language=ar&without_origin_country=EG`;
@@ -376,7 +372,7 @@
             document.getElementById('fullGrid').innerHTML = cards.join('');
 
             let pagHtml = '';
-            for(let i=1; i<=Math.min(data.total_pages, 10); i++) {
+            for(let i=1; i<=Math.min(data.total_pages || 1, 10); i++) {
                 pagHtml += `<button class="page-btn ${i === page ? 'active' : ''}" onclick="showFull('${endpoint}', '${title}', '${cat}', ${i})">${i}</button>`;
             }
             document.getElementById('fullPag').innerHTML = pagHtml;
