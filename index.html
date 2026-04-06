@@ -1,281 +1,435 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WatchGo - Developer & Admin Mode</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <style>
-        :root { 
-            --primary: #9b51e0; 
-            --bg-dark: #070707; 
-            --card-bg: #111;
-            --border-color: #222;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WatchGo - Developer Mode</title>
 
-        * { box-sizing: border-box; margin: 0; padding: 0; transition: border-color 0.3s, box-shadow 0.3s; }
-        body { background: var(--bg-dark); color: #fff; font-family: 'Segoe UI', Tahoma, sans-serif; overflow-x: hidden; scroll-behavior: smooth; }
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-        /* --- الهيدر --- */
-        .header { 
-            background: #000; padding: 0 40px; height: 75px;
-            display: flex; justify-content: space-between; align-items: center; 
-            border-bottom: 2px solid var(--primary); position: sticky; top: 0; z-index: 2000;
-            box-shadow: 0 0 20px var(--primary); /* تأثير اللون على الهيدر */
-        }
-        .logo-ctn img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--primary); cursor: pointer; box-shadow: 0 0 10px var(--primary); }
+<style>
+:root {
+--primary: #9b51e0;
+--bg-dark: #070707;
+--card-bg: #111;
+--border-color: #222;
+--netflix-red: #e50914;
+}
 
-        /* --- الألوان الشاملة للموقع --- */
-        .section-title { border-right: 5px solid var(--primary) !important; background: #111; padding: 12px 20px; font-size: 17px; font-weight: bold; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; }
-        .watch-btn, .save-btn, .master-btn { background: var(--primary) !important; }
-        .edit-pen { color: var(--primary) !important; }
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+}
 
-        /* --- سكرول الأفلام الجديد (بدون أرقام 1,2,3) --- */
-        .grid-display { 
-            display: flex; overflow-x: auto; gap: 20px; padding: 10px 5px 25px;
-            scrollbar-width: thin; scrollbar-color: var(--primary) #111;
-            scroll-snap-type: x mandatory;
-        }
-        .grid-display::-webkit-scrollbar { height: 6px; }
-        .grid-display::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
-        
-        .item-card { 
-            min-width: 190px; scroll-snap-align: start; background: var(--card-bg); 
-            border-radius: 8px; position: relative; border: 1px solid var(--border-color); 
-        }
-        .item-card:hover { border-color: var(--primary); box-shadow: 0 0 15px var(--primary); }
+body{
+background:var(--bg-dark);
+color:#fff;
+font-family:'Segoe UI',Tahoma,sans-serif;
+overflow-x:hidden;
+scroll-behavior:smooth;
+}
 
-        /* زر حذف الفيلم (السلة) */
-        .delete-btn { 
-            position: absolute; top: 8px; left: 8px; background: rgba(229, 9, 20, 0.9); 
-            color: white; border: none; width: 28px; height: 28px; border-radius: 5px; 
-            cursor: pointer; z-index: 100; opacity: 0; transition: 0.3s;
-        }
-        .item-card:hover .delete-btn { opacity: 1; }
+/* header */
 
-        /* زر إضافة فيلم في "كل" قسم */
-        .mini-add-btn { background: none; border: 1px dashed var(--primary); color: var(--primary); padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+.header{
+background:#000;
+padding:0 40px;
+height:75px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+border-bottom:2px solid var(--primary);
+position:sticky;
+top:0;
+z-index:2000;
+}
 
-        /* --- السلايدر المطور --- */
-        .slider-container { max-width: 1620px; margin: 20px auto; padding: 0 40px; position: relative; }
-        #heroSection { width: 100%; height: 420px; border-radius: 15px; border: 1px solid var(--border-color); overflow: hidden; }
-        .edit-slider-float { position: absolute; top: 15px; left: 55px; z-index: 100; background: var(--primary); color: white; border: none; padding: 5px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; }
+.logo-ctn{
+display:flex;
+align-items:center;
+gap:10px;
+text-decoration:none;
+color:white;
+}
 
-        /* --- الحفظ التلقائي --- */
-        [contenteditable="true"] { transition: 0.2s; padding: 2px 8px; border-radius: 4px; }
-        [contenteditable="true"]:focus { background: rgba(255,255,255,0.05); outline: 2px solid var(--primary); }
+.logo-ctn img{
+width:45px;
+height:45px;
+border-radius:50%;
+border:2px solid var(--primary);
+cursor:pointer;
+}
 
-        /* مودال الإضافة */
-        .admin-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(10px); }
-        .modal-content { background: #111; padding: 30px; border-radius: 15px; border: 1px solid var(--primary); width: 90%; max-width: 450px; }
-        
-        .hidden { display: none !important; }
-    </style>
+.edit-pen{
+cursor:pointer;
+color:var(--primary);
+margin-right:10px;
+font-size:14px;
+}
+
+.admin-controls{
+position:fixed;
+bottom:30px;
+left:30px;
+display:flex;
+flex-direction:column;
+gap:15px;
+z-index:9999;
+}
+
+.master-btn{
+width:60px;
+height:60px;
+border-radius:50%;
+border:none;
+cursor:pointer;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:24px;
+color:white;
+box-shadow:0 5px 15px rgba(0,0,0,0.5);
+}
+
+.save-all-btn{
+background:#27ae60;
+}
+
+.add-section-btn{
+background:var(--primary);
+}
+
+.grid-display{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+gap:20px;
+}
+
+.item-card{
+background:var(--card-bg);
+border-radius:8px;
+overflow:hidden;
+border:1px solid var(--border-color);
+cursor:pointer;
+position:relative;
+}
+
+.item-card img{
+width:100%;
+height:260px;
+object-fit:cover;
+}
+
+.delete-btn{
+position:absolute;
+top:5px;
+left:5px;
+background:rgba(0,0,0,.8);
+color:#fff;
+padding:4px 6px;
+font-size:12px;
+border-radius:4px;
+cursor:pointer;
+display:none;
+}
+
+.item-card:hover .delete-btn{
+display:block;
+}
+
+.add-card-btn{
+border:2px dashed #444;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+min-height:260px;
+border-radius:8px;
+cursor:pointer;
+color:#777;
+}
+
+.add-card-btn:hover{
+border-color:var(--primary);
+color:var(--primary);
+}
+
+.color-palette{
+position:fixed;
+right:20px;
+bottom:120px;
+background:#000;
+padding:10px;
+border-radius:10px;
+display:grid;
+grid-template-columns:repeat(6,1fr);
+gap:6px;
+z-index:9999;
+border:1px solid #333;
+}
+
+.color-palette div{
+width:22px;
+height:22px;
+border-radius:50%;
+cursor:pointer;
+}
+
+</style>
 </head>
+
 <body>
 
-    <header class="header">
-        <div class="logo-ctn">
-            <img id="mainLogo" src="https://i.ibb.co/5ggRsXdV/Red-Black-Modern-Movie-Cinema-Presentation-20260311-124846.jpg" onclick="changeLogo()">
-            <span id="siteTitleText" contenteditable="true" oninput="saveToLocal()">WATCH<span style="color: var(--primary);">GO</span></span>
-        </div>
-        
-        <div class="header-icons">
-            <input type="color" id="colorPicker" onchange="applyGlobalColor(this.value)" style="width:30px; height:30px; cursor:pointer; background:none; border:none;">
-            <i class="fa-solid fa-magnifying-glass icon-btn" onclick="toggleSearch()"></i>
-        </div>
-    </header>
+<header class="header">
 
-    <div id="searchBox" style="display:none; padding: 20px; text-align: center; background: #000; border-bottom: 1px solid var(--primary);">
-        <input type="text" id="searchInput" placeholder="ابحث هنا..." style="width: 80%; padding: 12px; border-radius: 50px; background: #111; color: #fff; border: 1px solid var(--primary);">
-    </div>
-    
-    <div class="slider-container">
-        <button class="edit-slider-float" onclick="alert('قريباً: رفع صور خاصة للسلايدر')"><i class="fa-solid fa-image"></i> تعديل السلايدر</button>
-        <div id="heroSection">
-            <div class="slider-wrapper" id="sliderWrapper"></div>
-        </div>
-    </div>
+<div class="logo-ctn">
+<img id="mainLogo" src="https://i.ibb.co/5ggRsXdV/Red-Black-Modern-Movie-Cinema-Presentation-20260311-124846.jpg">
+<span id="siteTitleText" contenteditable="true" style="font-weight:bold;font-size:22px;">
+WATCH<span style="color:var(--primary);">GO</span>
+</span>
+</div>
 
-    <div class="container" style="padding: 20px 40px;">
-        <main id="mainDisplay">
-            <section class="section-box">
-                <div class="section-title">
-                    <span contenteditable="true" id="devSecTitle" oninput="saveToLocal()">أفلام المطور المضافة</span>
-                    <button class="mini-add-btn" onclick="openAddModal('developerGrid')"><i class="fa-solid fa-plus"></i> إضافة فيلم</button>
-                </div>
-                <div class="grid-display" id="developerGrid"></div>
-            </section>
+</header>
 
-            <div id="dynamicSections"></div>
-        </main>
-    </div>
+<div class="container">
 
-    <div class="admin-controls" style="position: fixed; bottom: 20px; left: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 1000;">
-        <button class="master-btn" onclick="createNewSection()" style="width: 50px; height: 50px; border-radius: 50%; color: white; border: none; cursor: pointer;"><i class="fa-solid fa-folder-plus"></i></button>
-        <button class="master-btn" onclick="saveEverythingToCloud()" style="width: 50px; height: 50px; border-radius: 50%; color: white; border: none; cursor: pointer; background: #27ae60 !important;"><i class="fa-solid fa-cloud-upload-alt"></i></button>
-    </div>
+<section class="section-box">
 
-    <div id="adminModal" class="admin-modal">
-        <div class="modal-content">
-            <h3 style="color: var(--primary); margin-bottom: 15px; text-align: center;">إضافة فيلم جديد</h3>
-            <input type="text" id="mTitle" placeholder="عنوان الفيلم" style="width:100%; padding:10px; margin-bottom:10px; background:#000; border:1px solid #333; color:white;">
-            <input type="text" id="mImg" placeholder="رابط صورة البوستر" style="width:100%; padding:10px; margin-bottom:10px; background:#000; border:1px solid #333; color:white;">
-            <button class="save-btn" onclick="addNewMovieToGrid()" style="width:100%; padding:12px; color:white; border:none; cursor:pointer; font-weight:bold;">حفظ في القسم</button>
-            <button onclick="closeModal()" style="width:100%; background:none; border:none; color:#555; margin-top:10px; cursor:pointer;">إلغاء</button>
-        </div>
-    </div>
+<div class="section-title">
+أفلام مضافة
+</div>
 
-    <script>
-        const BASE_URL = 'https://script.google.com/macros/s/AKfycbw4GkkBMwuUqmeMBYUNV1u0LvQvMla1MgM6ActKpZsdhVvPUnUqdi1StaL_1KkEgniV2A/exec';
-        let currentActiveGrid = '';
+<div class="grid-display" id="developerGrid">
 
-        // نظام الحفظ المحلي (Local Storage) لضمان عدم ضياع التعديلات عند الريفريش
-        let siteData = JSON.parse(localStorage.getItem('watchgo_v2')) || {
-            theme: '#9b51e0',
-            siteName: 'WATCHGO',
-            logo: 'https://i.ibb.co/5ggRsXdV/Red-Black-Modern-Movie-Cinema-Presentation-20260311-124846.jpg',
-            customMovies: { 'developerGrid': [] },
-            extraSections: []
-        };
+<div class="add-card-btn" onclick="openAdminModal()">
+<i class="fa-solid fa-plus-circle"></i>
+<span>إضافة عمل</span>
+</div>
 
-        function saveToLocal() {
-            siteData.siteName = document.getElementById('siteTitleText').innerText;
-            siteData.logo = document.getElementById('mainLogo').src;
-            localStorage.setItem('watchgo_v2', JSON.stringify(siteData));
-        }
+</div>
 
-        function applyGlobalColor(color) {
-            document.documentElement.style.setProperty('--primary', color);
-            siteData.theme = color;
-            saveToLocal();
-        }
+</section>
 
-        // إنشاء كارت الفيلم مع زر المسح (السلة)
-        function createMovieCard(title, img, gridId, index) {
-            return `
-                <div class="item-card">
-                    <button class="delete-btn" onclick="deleteMovie('${gridId}', ${index})"><i class="fa-solid fa-trash-can"></i></button>
-                    <img src="${img}" onerror="this.src='https://via.placeholder.com/200x300?text=No+Image'">
-                    <div style="padding:10px; text-align:center; font-size:12px; font-weight:bold;">${title}</div>
-                    <div class="watch-btn" style="padding:5px; text-align:center; font-size:10px; cursor:pointer;">مشاهدة</div>
-                </div>`;
-        }
+</div>
+    <div class="admin-controls">
 
-        function openAddModal(gridId) {
-            currentActiveGrid = gridId;
-            document.getElementById('adminModal').style.display = 'flex';
-        }
+<button class="master-btn add-section-btn" onclick="createNewSection()">
+<i class="fa-solid fa-folder-plus"></i>
+</button>
 
-        function closeModal() { document.getElementById('adminModal').style.display = 'none'; }
+<button class="master-btn save-all-btn" onclick="saveAuto()">
+<i class="fa-solid fa-cloud-upload-alt"></i>
+</button>
 
-        function addNewMovieToGrid() {
-            const title = document.getElementById('mTitle').value;
-            const img = document.getElementById('mImg').value;
-            if(!title || !img) return alert("املا البيانات يا بطل!");
+</div>
 
-            if(!siteData.customMovies[currentActiveGrid]) siteData.customMovies[currentActiveGrid] = [];
-            siteData.customMovies[currentActiveGrid].push({ title, img });
-            
-            renderCustomGrids();
-            saveToLocal();
-            closeModal();
-            document.getElementById('mTitle').value = '';
-            document.getElementById('mImg').value = '';
-        }
 
-        function deleteMovie(gridId, index) {
-            if(confirm("مسح الفيلم ده؟")) {
-                siteData.customMovies[gridId].splice(index, 1);
-                renderCustomGrids();
-                saveToLocal();
-            }
-        }
+<div id="adminModal" class="admin-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);align-items:center;justify-content:center;z-index:9999;">
 
-        function renderCustomGrids() {
-            // رندر قسم المطور
-            const devGrid = document.getElementById('developerGrid');
-            devGrid.innerHTML = (siteData.customMovies['developerGrid'] || []).map((m, i) => createMovieCard(m.title, m.img, 'developerGrid', i)).join('');
+<div style="background:#111;padding:20px;border-radius:10px;width:90%;max-width:400px">
 
-            // رندر الأقسام الإضافية
-            const dynamicArea = document.getElementById('dynamicSections');
-            dynamicArea.innerHTML = siteData.extraSections.map(sec => `
-                <section class="section-box" id="box_${sec.id}">
-                    <div class="section-title">
-                        <span contenteditable="true" oninput="updateSecTitle('${sec.id}', this.innerText)">${sec.title}</span>
-                        <div>
-                            <button class="mini-add-btn" onclick="openAddModal('${sec.id}')"><i class="fa-solid fa-plus"></i></button>
-                            <i class="fa-solid fa-trash-alt" style="margin-right:10px; cursor:pointer; color:#555;" onclick="removeSection('${sec.id}')"></i>
-                        </div>
-                    </div>
-                    <div class="grid-display" id="${sec.id}">
-                        ${(siteData.customMovies[sec.id] || []).map((m, i) => createMovieCard(m.title, m.img, sec.id, i)).join('')}
-                    </div>
-                </section>
-            `).join('');
-        }
+<input id="mTitle" placeholder="عنوان الفيلم" style="width:100%;padding:10px;margin:5px 0;background:#000;border:1px solid #333;color:#fff">
 
-        function createNewSection() {
-            const name = prompt("اسم القسم الجديد:");
-            if(!name) return;
-            const id = 'grid_' + Date.now();
-            siteData.extraSections.push({ id, title: name });
-            siteData.customMovies[id] = [];
-            renderCustomGrids();
-            saveToLocal();
-        }
+<input id="mImg" placeholder="رابط الصورة" style="width:100%;padding:10px;margin:5px 0;background:#000;border:1px solid #333;color:#fff">
 
-        function removeSection(id) {
-            if(confirm("هتحذف القسم بكل اللي فيه؟")) {
-                siteData.extraSections = siteData.extraSections.filter(s => s.id !== id);
-                delete siteData.customMovies[id];
-                renderCustomGrids();
-                saveToLocal();
-            }
-        }
+<button onclick="addCustomMovie()" style="width:100%;padding:10px;background:var(--primary);border:none;color:#fff">
+إضافة
+</button>
 
-        function updateSecTitle(id, text) {
-            const sec = siteData.extraSections.find(s => s.id === id);
-            if(sec) sec.title = text;
-            saveToLocal();
-        }
+<button onclick="closeAdminModal()" style="width:100%;padding:10px;background:#222;border:none;color:#fff;margin-top:5px">
+إلغاء
+</button>
 
-        async function init() {
-            // تطبيق الألوان والبيانات المحفوظة
-            document.documentElement.style.setProperty('--primary', siteData.theme);
-            document.getElementById('colorPicker').value = siteData.theme;
-            document.getElementById('siteTitleText').innerText = siteData.siteName;
-            document.getElementById('mainLogo').src = siteData.logo;
-            
-            renderCustomGrids();
-            
-            // جلب أفلام السلايدر من TMDB
-            try {
-                const pop = await fetch(`${BASE_URL}?endpoint=movie/now_playing&language=ar-SA`);
-                const pData = await pop.json();
-                renderSlider(pData.results.slice(0, 5));
-            } catch(e) { console.log("خطأ في السلايدر"); }
-        }
+</div>
+</div>
 
-        function renderSlider(movies) {
-            const wrapper = document.getElementById('sliderWrapper');
-            wrapper.innerHTML = movies.map(m => `
-                <div class="slide" style="min-width:100%; height:100%; background-image: url('https://image.tmdb.org/t/p/original${m.backdrop_path}'); background-size:cover; position:relative;">
-                    <div style="position:absolute; inset:0; background:linear-gradient(to top, #070707, transparent); display:flex; flex-direction:column; justify-content:flex-end; padding:40px;">
-                        <h2 style="font-size:30px; color:#fff;">${m.title || m.name}</h2>
-                    </div>
-                </div>`).join('');
-            let i = 0; setInterval(() => { i = (i + 1) % movies.length; wrapper.style.transform = `translateX(${i * 100}%)`; }, 5000);
-        }
 
-        function changeLogo() {
-            const url = prompt("رابط اللوجو الجديد:", siteData.logo);
-            if(url) { document.getElementById('mainLogo').src = url; saveToLocal(); }
-        }
+<script>
 
-        init();
-    </script>
+const presetColors = [
+"#9b51e0","#e50914","#27ae60","#3498db","#f39c12",
+"#e74c3c","#1abc9c","#2ecc71","#8e44ad","#2980b9",
+"#16a085","#c0392b","#d35400","#2c3e50","#f1c40f",
+"#ff4757","#3742fa","#2ed573","#ffa502","#ff6b81",
+"#7bed9f","#70a1ff","#5352ed","#ff6348","#48dbfb",
+"#10ac84","#5f27cd","#ee5253","#0abde3","#222f3e"
+];
+
+function renderColors(){
+
+const box=document.createElement("div");
+box.className="color-palette";
+
+presetColors.forEach(c=>{
+const d=document.createElement("div");
+d.style.background=c;
+d.onclick=()=>changeMainTheme(c);
+box.appendChild(d);
+});
+
+document.body.appendChild(box);
+
+}
+
+renderColors();
+
+
+function changeMainTheme(color){
+document.documentElement.style.setProperty('--primary',color);
+saveAuto();
+}
+
+
+function openAdminModal(){
+document.getElementById("adminModal").style.display="flex";
+}
+
+function closeAdminModal(){
+document.getElementById("adminModal").style.display="none";
+}
+
+
+function addCustomMovie(){
+
+const title=document.getElementById("mTitle").value;
+const img=document.getElementById("mImg").value;
+
+if(!title || !img) return;
+
+const card=`
+<div class="item-card">
+
+<div class="delete-btn" onclick="this.parentElement.remove();saveAuto()">X</div>
+
+<img src="${img}">
+
+<div style="padding:10px;text-align:center;font-size:13px">
+${title}
+</div>
+
+</div>
+`;
+
+document.getElementById("developerGrid")
+.insertAdjacentHTML("afterbegin",card);
+
+closeAdminModal();
+saveAuto();
+
+}
+    /* =========================
+   Auto Save
+========================= */
+
+function saveAuto(){
+localStorage.setItem("watchgo_save",document.body.innerHTML);
+}
+
+function loadAuto(){
+
+const data=localStorage.getItem("watchgo_save");
+
+if(data){
+document.body.innerHTML=data;
+attachEvents();
+}
+
+}
+
+window.addEventListener("load",loadAuto);
+
+
+
+/* =========================
+   add section
+========================= */
+
+function createNewSection(){
+
+const name=prompt("اسم القسم");
+
+if(!name) return;
+
+const id="sec_"+Date.now();
+
+const html=`
+
+<section class="section-box" id="${id}">
+
+<div class="section-title">
+${name}
+</div>
+
+<div class="grid-display">
+
+<div class="add-card-btn" onclick="openAdminModal()">
+<i class="fa-solid fa-plus-circle"></i>
+<span>إضافة عمل</span>
+</div>
+
+</div>
+
+</section>
+
+`;
+
+document.querySelector(".container")
+.insertAdjacentHTML("beforeend",html);
+
+saveAuto();
+
+}
+
+
+/* =========================
+delete hover inject
+========================= */
+
+document.addEventListener("mouseover",e=>{
+
+const card=e.target.closest(".item-card");
+
+if(!card) return;
+
+if(card.querySelector(".delete-btn")) return;
+
+const btn=document.createElement("div");
+
+btn.className="delete-btn";
+btn.innerText="X";
+
+btn.onclick=(ev)=>{
+ev.stopPropagation();
+card.remove();
+saveAuto();
+};
+
+card.appendChild(btn);
+
+});
+
+
+/* =========================
+rebind after load
+========================= */
+
+function attachEvents(){
+
+document.querySelectorAll(".add-card-btn").forEach(btn=>{
+btn.onclick=openAdminModal;
+});
+
+}
+
+
+
+/* =========================
+init
+========================= */
+
+attachEvents();
+
+</script>
 </body>
 </html>
-
