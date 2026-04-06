@@ -27,7 +27,6 @@
         }  
         .logo-ctn { display: flex; align-items: center; gap: 10px; text-decoration: none; color: white; flex-shrink: 0; }  
         .logo-ctn img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--primary); transition: 0.3s; }  
-        /* تأثير وضع التعديل على اللوجو */
         .edit-mode-enabled .logo-ctn img { cursor: pointer; border: 2px dashed var(--edit-border); position: relative; opacity: 0.8; }
         .edit-mode-enabled .logo-ctn img:hover { opacity: 1; transform: scale(1.05); }
 
@@ -54,12 +53,10 @@
         .icon-btn { color: #ccc; cursor: pointer; font-size: 18px; transition: 0.3s; }  
         .icon-btn:hover { color: var(--primary); }  
 
-        /* باليتة الألوان */
         .color-picker-container { display: none; position: absolute; top: 75px; left: 40px; background: #111; border: 1px solid var(--primary); padding: 15px; border-radius: 12px; grid-template-columns: repeat(6, 1fr); gap: 8px; z-index: 4000; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
         .color-swatch { width: 25px; height: 25px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
         .color-swatch:hover { transform: scale(1.2); border-color: #fff; }
 
-        /* --- باقي التنسيقات الأصلية --- */
         #searchBox { background: rgba(0,0,0,0.95); padding: 20px; display: none; position: fixed; top: 75px; left: 0; width: 100%; z-index: 1500; border-bottom: 1px solid var(--primary); backdrop-filter: blur(10px); }  
         #searchBox input { width: 80%; max-width: 800px; padding: 15px 25px; background: #111; border: 2px solid var(--border-color); color: #fff; border-radius: 50px; outline: none; font-size: 18px; transition: 0.3s; }  
         #searchBox input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(155, 81, 224, 0.3); }  
@@ -99,6 +96,14 @@
         .meta-info span { border: 1px solid #333; padding: 2px 6px; border-radius: 3px; background: #000; }  
         .watch-btn { background: var(--primary); color: #fff; font-size: 12px; padding: 8px; border-radius: 4px; font-weight: bold; display: block; text-align: center; text-decoration: none; }  
 
+        /* تعديلات كارت الإضافة وعلامة X */
+        .item-card .delete-movie-btn { position: absolute; top: 10px; left: 10px; background: var(--netflix-red); color: white; width: 26px; height: 26px; border-radius: 50%; display: none; align-items: center; justify-content: center; z-index: 500; border: 2px solid #000; font-size: 12px; cursor: pointer; }
+        .edit-mode-enabled .item-card .delete-movie-btn { display: flex; }
+        .add-movie-card { border: 2px dashed var(--primary); border-radius: 8px; height: 260px; display: none; flex-direction: column; align-items: center; justify-content: center; color: var(--primary); cursor: pointer; transition: 0.3s; }
+        .edit-mode-enabled .add-movie-card { display: flex; }
+        .btn-new-section { background: var(--primary); color: white; padding: 10px 25px; border-radius: 25px; border: none; cursor: pointer; font-weight: bold; margin: 30px auto; display: none; }
+        .edit-mode-enabled .btn-new-section { display: block; }
+
         .pagination-container { display: flex; justify-content: center; gap: 8px; margin-top: 25px; margin-bottom: 10px; }  
         .page-btn { background: #1a1a1a; color: #fff; border: 1px solid #333; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; transition: 0.3s; min-width: 35px; }  
         .page-btn:hover, .page-btn.active { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 8px var(--primary); }  
@@ -114,8 +119,8 @@
         .side-item .txt { font-size: 11px; color: #ccc; }  
 
         .edit-mode-enabled [contenteditable="true"] { outline: 2px dashed var(--edit-border); background-color: rgba(76, 175, 80, 0.1); cursor: text; }  
-        .edit-mode-enabled .add-movie-btn, .add-section-btn { display: inline-block; background: var(--primary); padding: 6px 12px; margin: 10px 0; border-radius: 20px; font-size: 12px; cursor: pointer; }  
-
+        
+        .hidden { display: none !important; }
         @media (max-width: 1200px) { .container { grid-template-columns: 1fr; } .sidebar { display: none; } .main-nav { display: none; } }  
     </style>
 </head>  
@@ -170,7 +175,6 @@
         <i class="fa-solid fa-magnifying-glass icon-btn" onclick="toggleSearch()"></i>  
         <i class="fa-solid fa-gear icon-btn" id="toggleEditModeBtn"></i>  
     </div>
-
     <div class="color-picker-container" id="colorPicker"></div>
 </header>  
 
@@ -222,7 +226,8 @@
                 <div class="pagination-container" id="fullPag"></div>  
             </div>  
         </div>  
-        <div id="extraSectionsContainer"></div>  
+        <div id="extraSectionsContainer"></div>
+        <center><button class="btn-new-section" onclick="addNewSection()">+ إضافة قسم جديد للموقع</button></center>
     </main>  
 
     <aside class="sidebar">  
@@ -238,7 +243,6 @@
     let extraSections = []; 
     let apiSliderMovies = []; 
 
-    // --- وظائف الهيدر الجديدة ---
     const colors = ['#9b51e0', '#e50914', '#27ae60', '#2980b9', '#f1c40f', '#e67e22', '#1abc9c', '#fd79a8', '#6c5ce7', '#fab1a0', '#00b894', '#00cec9', '#ff7675', '#74b9ff', '#a29bfe', '#ffeaa7', '#55efc4', '#81ecec', '#ff9f43', '#ee5253', '#0abde3', '#10ac84', '#5f27cd', '#ff6b6b', '#48dbfb', '#1dd1a1', '#feca57', '#54a0ff', '#00d2d3', '#c0392b'];
 
     function initColorPicker() {
@@ -270,12 +274,10 @@
         }
     }
 
-    // --- وظيفة السلايدر المدمجة ---
     function renderSlider() {
         const wrapper = document.getElementById('sliderWrapper');
         const customS = JSON.parse(localStorage.getItem('wg_slider_custom')) || [];
         const finalSlides = customS.length > 0 ? customS : apiSliderMovies;
-
         wrapper.innerHTML = finalSlides.map(m => `
             <div class="slide" style="background-image: url('https://image.tmdb.org/t/p/original${m.backdrop_path}')">
                 <div class="slide-overlay">
@@ -284,7 +286,6 @@
                 </div>
             </div>
         `).join('');
-
         if(editMode && !document.getElementById('manageSliderBtn')) {
             const btn = document.createElement('div');
             btn.id = 'manageSliderBtn';
@@ -348,8 +349,6 @@
     function loadStoredData() {  
         const stored = localStorage.getItem('watchgo_dev_custom');  
         if(stored) { try { const data = JSON.parse(stored); customMovies = data.customMovies || {}; extraSections = data.extraSections || []; } catch(e) {} }  
-        
-        // استعادة إعدادات الهيدر
         const sColor = localStorage.getItem('watchgo_primary_color');
         if(sColor) document.documentElement.style.setProperty('--primary', sColor);
         const sLogo = localStorage.getItem('watchgo_logo');
@@ -358,11 +357,12 @@
         if(sName) document.getElementById('siteName').innerText = sName;
     }  
 
-    async function createCard(m, type, isCustom = false) {
+    async function createCard(m, type, sectionKey) {
         const date = m.release_date || m.first_air_date || '2026';
         const year = date.split('-')[0];
-        return `<div class="item-card" onclick="location.href='movie.html?id=${m.id}&type=${type}'">
-            <img src="https://image.tmdb.org/t/p/w500${m.poster_path}">
+        return `<div class="item-card" data-id="${m.id}">
+            <div class="delete-movie-btn" onclick="deleteMovieFromSection(event, '${m.id}', '${sectionKey}')">✕</div>
+            <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" onclick="location.href='movie.html?id=${m.id}&type=${type}'">
             <div class="hover-details">
                 <div class="item-name">${m.title || m.name}</div>
                 <p class="item-story">${m.overview || "لا يوجد وصف عربي."}</p>
@@ -378,15 +378,39 @@
         else if(cat === 'ramadan') finalUrl += `&with_original_language=ar&first_air_date_year=2026`;
         const res = await fetch(finalUrl);  
         const data = await res.json();  
-        const cards = await Promise.all(data.results.slice(0, 12).map(m => createCard(m, type)));
-        document.getElementById(gridId).innerHTML = cards.join('');
-        
-        let pagHtml = '';
-        for(let i=1; i<=Math.min(data.total_pages, 5); i++) {
-            pagHtml += `<button class="page-btn ${i===pageNum?'active':''}" onclick="loadSection('${urlPath}','${gridId}','${pagId}','${type}','${cat}',${i},'${sectionKey}')">${i}</button>`;
+        const deletedIds = JSON.parse(localStorage.getItem(`deleted_${sectionKey}`)) || [];
+        const filteredResults = data.results.filter(m => !deletedIds.includes(String(m.id)));
+        const cards = await Promise.all(filteredResults.slice(0, 11).map(m => createCard(m, type, sectionKey)));
+        const addCardHtml = `<div class="add-movie-card" onclick="window.location.href='movie.html?action=add&section=${sectionKey}'"><i class="fa-solid fa-plus" style="font-size: 24px;"></i><span style="margin-top:8px;font-size:12px;">إضافة فيلم</span></div>`;
+        document.getElementById(gridId).innerHTML = cards.join('') + addCardHtml;
+        if(document.getElementById(pagId)) {
+            let pagHtml = '';
+            for(let i=1; i<=Math.min(data.total_pages, 5); i++) {
+                pagHtml += `<button class="page-btn ${i===pageNum?'active':''}" onclick="loadSection('${urlPath}','${gridId}','${pagId}','${type}','${cat}',${i},'${sectionKey}')">${i}</button>`;
+            }
+            document.getElementById(pagId).innerHTML = pagHtml;
         }
-        if(document.getElementById(pagId)) document.getElementById(pagId).innerHTML = pagHtml;
     }  
+
+    function deleteMovieFromSection(event, movieId, sectionKey) {
+        event.stopPropagation();
+        let deletedIds = JSON.parse(localStorage.getItem(`deleted_${sectionKey}`)) || [];
+        deletedIds.push(String(movieId));
+        localStorage.setItem(`deleted_${sectionKey}`, JSON.stringify(deletedIds));
+        const card = event.target.closest('.item-card');
+        card.style.transform = 'scale(0)';
+        setTimeout(() => card.remove(), 300);
+    }
+
+    function addNewSection() {
+        const sectionName = prompt("أدخل اسم القسم الجديد:");
+        if (sectionName) {
+            const key = 'custom_' + Date.now();
+            extraSections.push({ title: sectionName, key: key });
+            localStorage.setItem('watchgo_dev_custom', JSON.stringify({ customMovies, extraSections }));
+            location.reload(); 
+        }
+    }
 
     function initSections() {  
         loadSection('discover/tv', 'ramadanGrid', 'ramadanPag', 'tv', 'ramadan', 1, 'ramadan');  
@@ -414,12 +438,9 @@
         editMode = enable; document.body.classList.toggle('edit-mode-enabled', enable);  
         renderSlider();
         document.querySelectorAll('.section-title-text, .nav-link').forEach(el => el.setAttribute('contenteditable', enable));
-        // تفعيل تعديل اسم الموقع
         const sName = document.getElementById('siteName');
         sName.contentEditable = enable;
-        if(enable) {
-            sName.onblur = () => localStorage.setItem('watchgo_name', sName.innerText);
-        }
+        if(enable) { sName.onblur = () => localStorage.setItem('watchgo_name', sName.innerText); }
     }  
 
     document.getElementById('toggleEditModeBtn').onclick = () => enableEditMode(!editMode);  
@@ -430,7 +451,7 @@
         document.getElementById('sliderArea').classList.add('hidden');
         document.getElementById('fullView').classList.remove('hidden');
         document.getElementById('fullTitle').innerText = title;
-        loadSection(endpoint, 'fullGrid', 'fullPag', endpoint.includes('tv')?'tv':'movie', cat);
+        loadSection(endpoint, 'fullGrid', 'fullPag', endpoint.includes('tv')?'tv':'movie', cat, 1, 'fullview');
     };
 
     function renderExtraSections() {  
@@ -438,14 +459,11 @@
         extraSections.forEach(sec => {  
             const div = document.createElement('section'); div.className = 'section-box';  
             div.innerHTML = `<div class="section-title"><span><i class="fa-solid fa-film"></i> ${sec.title}</span></div><div class="grid-display" id="grid_${sec.key}"></div>`;  
-            container.appendChild(div); loadSection('discover/movie', `grid_${sec.key}`, '', 'movie');  
+            container.appendChild(div); loadSection('discover/movie', `grid_${sec.key}`, '', 'movie', '', 1, sec.key);  
         });  
     }
-
     init();
-
-    let currentSlide = 0;
-    let slideInterval;
+    let currentSlide = 0; let slideInterval;
     function startAutoSlide() {
         clearInterval(slideInterval); 
         slideInterval = setInterval(() => {
