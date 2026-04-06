@@ -26,7 +26,10 @@
             border-bottom: 2px solid var(--primary); position: sticky; top: 0; z-index: 2000;  
         }  
         .logo-ctn { display: flex; align-items: center; gap: 10px; text-decoration: none; color: white; flex-shrink: 0; }  
-        .logo-ctn img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--primary); }  
+        .logo-ctn img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--primary); transition: 0.3s; }  
+        /* تأثير وضع التعديل على اللوجو */
+        .edit-mode-enabled .logo-ctn img { cursor: pointer; border: 2px dashed var(--edit-border); position: relative; opacity: 0.8; }
+        .edit-mode-enabled .logo-ctn img:hover { opacity: 1; transform: scale(1.05); }
 
         .main-nav { display: flex; list-style: none; height: 100%; align-items: center; gap: 5px; }  
         .nav-item { position: relative; height: 100%; display: flex; align-items: center; }  
@@ -51,20 +54,16 @@
         .icon-btn { color: #ccc; cursor: pointer; font-size: 18px; transition: 0.3s; }  
         .icon-btn:hover { color: var(--primary); }  
 
-        /* --- شريط البحث --- */  
-        #searchBox {   
-            background: rgba(0,0,0,0.95); padding: 20px; display: none;   
-            position: fixed; top: 75px; left: 0; width: 100%; z-index: 1500;  
-            border-bottom: 1px solid var(--primary); backdrop-filter: blur(10px);  
-        }  
-        #searchBox input {   
-            width: 80%; max-width: 800px; padding: 15px 25px; background: #111;   
-            border: 2px solid var(--border-color); color: #fff; border-radius: 50px;   
-            outline: none; font-size: 18px; transition: 0.3s;  
-        }  
+        /* باليتة الألوان */
+        .color-picker-container { display: none; position: absolute; top: 75px; left: 40px; background: #111; border: 1px solid var(--primary); padding: 15px; border-radius: 12px; grid-template-columns: repeat(6, 1fr); gap: 8px; z-index: 4000; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+        .color-swatch { width: 25px; height: 25px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+        .color-swatch:hover { transform: scale(1.2); border-color: #fff; }
+
+        /* --- باقي التنسيقات الأصلية --- */
+        #searchBox { background: rgba(0,0,0,0.95); padding: 20px; display: none; position: fixed; top: 75px; left: 0; width: 100%; z-index: 1500; border-bottom: 1px solid var(--primary); backdrop-filter: blur(10px); }  
+        #searchBox input { width: 80%; max-width: 800px; padding: 15px 25px; background: #111; border: 2px solid var(--border-color); color: #fff; border-radius: 50px; outline: none; font-size: 18px; transition: 0.3s; }  
         #searchBox input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(155, 81, 224, 0.3); }  
 
-        /* --- السلايدر المطور --- */  
         .slider-container { max-width: 1620px; margin: 20px auto; padding: 0 40px; position: relative; }  
         #heroSection { width: 100%; height: 420px; position: relative; overflow: hidden; border-radius: 15px; border: 1px solid var(--border-color); background: #000; }  
         .slider-wrapper { display: flex; width: 100%; height: 100%; transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); } 
@@ -72,10 +71,8 @@
         .slide-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(7,7,7,1) 5%, transparent 70%); display: flex; flex-direction: column; justify-content: flex-end; padding: 40px; }  
         .slide-title { font-size: 32px; font-weight: 900; margin-bottom: 15px; text-shadow: 2px 2px 10px #000; }  
         
-        /* زر إدارة السلايدر */
         .manage-slider-btn { position: absolute; top: 15px; right: 55px; background: var(--primary); color: white; padding: 8px 15px; border-radius: 20px; font-size: 12px; cursor: pointer; z-index: 2001; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
 
-        /* مودالات السلايدر */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 5000; padding: 20px; }
         .modal-content { background: #111; border: 1px solid var(--primary); border-radius: 15px; width: 100%; max-width: 900px; max-height: 85vh; overflow-y: auto; padding: 25px; position: relative; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 10px; }
@@ -89,7 +86,6 @@
         .lib-item img { width: 100%; height: 100%; object-fit: cover; }
         .lib-item .p-title { position: absolute; bottom: 0; background: rgba(0,0,0,0.85); width: 100%; font-size: 10px; padding: 6px; text-align: center; }
 
-        /* --- كارت المحتوى --- */  
         .grid-display { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }  
         .item-card { background: var(--card-bg); border-radius: 8px; overflow: visible; border: 1px solid var(--border-color); transition: 0.4s ease; cursor: pointer; position: relative; z-index: 1; }  
         .item-card:hover { transform: scale(1.1); z-index: 100; box-shadow: 0 10px 40px rgba(0,0,0,0.9); border-color: var(--primary); }  
@@ -103,12 +99,10 @@
         .meta-info span { border: 1px solid #333; padding: 2px 6px; border-radius: 3px; background: #000; }  
         .watch-btn { background: var(--primary); color: #fff; font-size: 12px; padding: 8px; border-radius: 4px; font-weight: bold; display: block; text-align: center; text-decoration: none; }  
 
-        /* --- الترقيم --- */  
         .pagination-container { display: flex; justify-content: center; gap: 8px; margin-top: 25px; margin-bottom: 10px; }  
         .page-btn { background: #1a1a1a; color: #fff; border: 1px solid #333; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; transition: 0.3s; min-width: 35px; }  
         .page-btn:hover, .page-btn.active { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 8px var(--primary); }  
 
-        /* الحاويات */  
         .container { padding: 20px 40px; display: grid; grid-template-columns: 280px 1fr 280px; gap: 25px; max-width: 1700px; margin: 0 auto; }  
         .section-box { margin-bottom: 50px; position: relative; }  
         .section-title { background: #111; padding: 12px 20px; font-size: 17px; font-weight: bold; margin-bottom: 20px; border-right: 5px solid var(--primary); display: flex; align-items: center; gap: 10px; }  
@@ -119,7 +113,6 @@
         .side-item img { width: 45px; height: 65px; border-radius: 4px; object-fit: cover; }  
         .side-item .txt { font-size: 11px; color: #ccc; }  
 
-        /* وضع التحرير */  
         .edit-mode-enabled [contenteditable="true"] { outline: 2px dashed var(--edit-border); background-color: rgba(76, 175, 80, 0.1); cursor: text; }  
         .edit-mode-enabled .add-movie-btn, .add-section-btn { display: inline-block; background: var(--primary); padding: 6px 12px; margin: 10px 0; border-radius: 20px; font-size: 12px; cursor: pointer; }  
 
@@ -149,10 +142,11 @@
 </div>
 
 <header class="header">  
-    <a href="#" class="logo-ctn">  
-        <img src="https://i.ibb.co/5ggRsXdV/Red-Black-Modern-Movie-Cinema-Presentation-20260311-124846.jpg">  
-        <span style="font-weight: bold; font-size: 22px;">WATCH<span style="color: var(--primary);">GO</span></span>  
-    </a>  
+    <div class="logo-ctn">  
+        <input type="file" id="logoInput" hidden accept="image/*" onchange="changeLogo(this)">
+        <img src="https://i.ibb.co/5ggRsXdV/Red-Black-Modern-Movie-Cinema-Presentation-20260311-124846.jpg" id="mainLogo" onclick="triggerLogoUpload()">  
+        <span style="font-weight: bold; font-size: 22px;"><span id="siteName">WATCH</span><span style="color: var(--primary);">GO</span></span>  
+    </div>  
     <nav class="main-nav">  
         <div class="nav-item"><a class="nav-link" href="#">الرئيسية</a></div>  
         <div class="nav-item">  
@@ -172,9 +166,12 @@
         </div>  
     </nav>  
     <div class="header-icons">  
+        <i class="fa-solid fa-palette icon-btn" onclick="toggleColorPicker()" title="تغيير اللون"></i>
         <i class="fa-solid fa-magnifying-glass icon-btn" onclick="toggleSearch()"></i>  
         <i class="fa-solid fa-gear icon-btn" id="toggleEditModeBtn"></i>  
-    </div>  
+    </div>
+
+    <div class="color-picker-container" id="colorPicker"></div>
 </header>  
 
 <div id="searchBox">  
@@ -241,7 +238,39 @@
     let extraSections = []; 
     let apiSliderMovies = []; 
 
-    // --- وظيفة السلايدر الجديدة المدمجة ---
+    // --- وظائف الهيدر الجديدة ---
+    const colors = ['#9b51e0', '#e50914', '#27ae60', '#2980b9', '#f1c40f', '#e67e22', '#1abc9c', '#fd79a8', '#6c5ce7', '#fab1a0', '#00b894', '#00cec9', '#ff7675', '#74b9ff', '#a29bfe', '#ffeaa7', '#55efc4', '#81ecec', '#ff9f43', '#ee5253', '#0abde3', '#10ac84', '#5f27cd', '#ff6b6b', '#48dbfb', '#1dd1a1', '#feca57', '#54a0ff', '#00d2d3', '#c0392b'];
+
+    function initColorPicker() {
+        const picker = document.getElementById('colorPicker');
+        picker.innerHTML = colors.map(c => `<div class="color-swatch" style="background:${c}" onclick="updateThemeColor('${c}')"></div>`).join('');
+    }
+
+    function toggleColorPicker() {
+        const p = document.getElementById('colorPicker');
+        p.style.display = p.style.display === 'grid' ? 'none' : 'grid';
+    }
+
+    function updateThemeColor(color) {
+        document.documentElement.style.setProperty('--primary', color);
+        localStorage.setItem('watchgo_primary_color', color);
+        toggleColorPicker();
+    }
+
+    function triggerLogoUpload() { if(editMode) document.getElementById('logoInput').click(); }
+
+    function changeLogo(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('mainLogo').src = e.target.result;
+                localStorage.setItem('watchgo_logo', e.target.result);
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // --- وظيفة السلايدر المدمجة ---
     function renderSlider() {
         const wrapper = document.getElementById('sliderWrapper');
         const customS = JSON.parse(localStorage.getItem('wg_slider_custom')) || [];
@@ -316,16 +345,17 @@
 
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-    // --- الوظائف الأصلية بالكامل (الـ 500 سطر) ---
     function loadStoredData() {  
         const stored = localStorage.getItem('watchgo_dev_custom');  
-        if(stored) {  
-            try {  
-                const data = JSON.parse(stored);  
-                customMovies = data.customMovies || {};  
-                extraSections = data.extraSections || [];  
-            } catch(e) {}  
-        }  
+        if(stored) { try { const data = JSON.parse(stored); customMovies = data.customMovies || {}; extraSections = data.extraSections || []; } catch(e) {} }  
+        
+        // استعادة إعدادات الهيدر
+        const sColor = localStorage.getItem('watchgo_primary_color');
+        if(sColor) document.documentElement.style.setProperty('--primary', sColor);
+        const sLogo = localStorage.getItem('watchgo_logo');
+        if(sLogo) document.getElementById('mainLogo').src = sLogo;
+        const sName = localStorage.getItem('watchgo_name');
+        if(sName) document.getElementById('siteName').innerText = sName;
     }  
 
     async function createCard(m, type, isCustom = false) {
@@ -355,7 +385,7 @@
         for(let i=1; i<=Math.min(data.total_pages, 5); i++) {
             pagHtml += `<button class="page-btn ${i===pageNum?'active':''}" onclick="loadSection('${urlPath}','${gridId}','${pagId}','${type}','${cat}',${i},'${sectionKey}')">${i}</button>`;
         }
-        document.getElementById(pagId).innerHTML = pagHtml;
+        if(document.getElementById(pagId)) document.getElementById(pagId).innerHTML = pagHtml;
     }  
 
     function initSections() {  
@@ -366,7 +396,7 @@
     }  
 
     async function init() {  
-        loadStoredData(); initSections();  
+        loadStoredData(); initSections(); initColorPicker();
         try {  
             const pop = await fetch(`${BASE_URL}?endpoint=movie/now_playing&language=ar-SA`);  
             const pData = await pop.json(); apiSliderMovies = pData.results.slice(0, 5); renderSlider();  
@@ -384,6 +414,12 @@
         editMode = enable; document.body.classList.toggle('edit-mode-enabled', enable);  
         renderSlider();
         document.querySelectorAll('.section-title-text, .nav-link').forEach(el => el.setAttribute('contenteditable', enable));
+        // تفعيل تعديل اسم الموقع
+        const sName = document.getElementById('siteName');
+        sName.contentEditable = enable;
+        if(enable) {
+            sName.onblur = () => localStorage.setItem('watchgo_name', sName.innerText);
+        }
     }  
 
     document.getElementById('toggleEditModeBtn').onclick = () => enableEditMode(!editMode);  
@@ -410,13 +446,12 @@
 
     let currentSlide = 0;
     let slideInterval;
-
     function startAutoSlide() {
         clearInterval(slideInterval); 
         slideInterval = setInterval(() => {
             const wrapper = document.getElementById('sliderWrapper');
             const slides = document.querySelectorAll('.slide');
-            if (slides.length > 1) {
+            if (slides && slides.length > 1) {
                 currentSlide = (currentSlide + 1) % slides.length;
                 wrapper.style.transform = `translateX(${currentSlide * 100}%)`;
             }
