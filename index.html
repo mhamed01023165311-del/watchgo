@@ -3,343 +3,353 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WatchGo - Master Pro Edition</title>
+    <title>WatchGo - النظام المتكامل 2026</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        :root { --primary: #9b51e0; --bg-dark: #070707; --card-bg: #111; --border-color: #222; }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: var(--bg-dark); color: #fff; font-family: 'Segoe UI', Tahoma, sans-serif; overflow-x: hidden; scroll-behavior: smooth; }
+        /* =========================================
+           1. الأساسيات والخطوط (نفس ستايلك الأصلي)
+           ========================================= */
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap');
 
-        /* --- الهيدر والبحث --- */
-        .header { background: #000; padding: 0 40px; height: 75px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary); position: sticky; top: 0; z-index: 2000; }
-        .logo-box { display: flex; align-items: center; gap: 10px; position: relative; }
-        .logo-box img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; cursor: pointer; }
+        :root { 
+            --primary: #9b51e0; 
+            --bg-dark: #070707; 
+            --card-bg: #111;
+            --border-color: #222;
+            --text-main: #fff;
+            --text-dim: #aaa;
+            --shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
+        body { background: var(--bg-dark); color: var(--text-main); overflow-x: hidden; scroll-behavior: smooth; }
+
+        /* =========================================
+           2. الهيدر (قابل للتعديل)
+           ========================================= */
+        .header { 
+            background: #000; padding: 0 40px; height: 75px;
+            display: flex; justify-content: space-between; align-items: center; 
+            border-bottom: 2px solid var(--primary); position: sticky; top: 0; z-index: 2000;
+        }
+        .logo-ctn { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .logo-ctn img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--primary); }
+        .nav-links { display: flex; gap: 20px; list-style: none; }
+        .nav-links li a { color: var(--text-main); text-decoration: none; font-size: 14px; font-weight: bold; transition: 0.3s; }
+        .nav-links li a:hover { color: var(--primary); }
+
+        /* =========================================
+           3. السلايدر المتطور (Hero Section)
+           ========================================= */
+        .hero-container { padding: 20px 40px; }
+        .hero-slider { 
+            width: 100%; height: 450px; background: #000; border-radius: 15px; 
+            overflow: hidden; border: 1px solid var(--border-color); position: relative;
+        }
+        .slide-item { 
+            width: 100%; height: 100%; background-size: cover; background-position: center;
+            position: absolute; opacity: 0; transition: 1s ease-in-out; 
+        }
+        .slide-item.active { opacity: 1; }
+        .slide-overlay { 
+            position: absolute; inset: 0; 
+            background: linear-gradient(to top, var(--bg-dark) 5%, transparent 80%);
+            display: flex; flex-direction: column; justify-content: flex-end; padding: 50px;
+        }
+        .slide-title { font-size: 40px; font-weight: 900; margin-bottom: 10px; text-shadow: 2px 2px 10px #000; }
+        .slide-desc { color: var(--text-dim); max-width: 600px; margin-bottom: 20px; }
+
+        /* =========================================
+           4. نظام الشبكة (Grids) والبطاقات (Cards)
+           ========================================= */
+        .main-wrapper { display: grid; grid-template-columns: 300px 1fr 300px; gap: 25px; padding: 20px 40px; max-width: 1800px; margin: 0 auto; }
         
-        #searchBox { background: rgba(0,0,0,0.95); padding: 20px; display: none; position: fixed; top: 75px; left: 0; width: 100%; z-index: 1500; border-bottom: 1px solid var(--primary); backdrop-filter: blur(10px); }
-        #searchBox input { width: 80%; max-width: 800px; padding: 15px 25px; background: #111; border: 2px solid var(--border-color); color: #fff; border-radius: 50px; outline: none; font-size: 18px; }
+        .section-title { 
+            background: #111; padding: 12px 20px; font-size: 18px; font-weight: bold; 
+            margin-bottom: 25px; border-right: 5px solid var(--primary); 
+            display: flex; justify-content: space-between; align-items: center;
+        }
 
-        /* --- التخطيط الرئيسي والقوائم الجانبية (قد تعجبك) --- */
-        .main-container { padding: 20px 40px; display: grid; grid-template-columns: 280px 1fr 280px; gap: 25px; max-width: 1700px; margin: 0 auto; }
-        .sidebar { background: #111; border: 1px solid var(--border-color); border-radius: 8px; height: fit-content; position: sticky; top: 90px; padding: 15px; }
-        .section-title { background: #1a1a1a; padding: 12px 20px; font-size: 17px; font-weight: bold; margin-bottom: 20px; border-right: 5px solid var(--primary); display: flex; justify-content: space-between; align-items: center; }
-
-        /* --- السلايدر والشبكة --- */
-        .slider-container { max-width: 1620px; margin: 20px auto; padding: 0 40px; }
-        #heroSection { width: 100%; height: 420px; position: relative; overflow: hidden; border-radius: 15px; border: 1px solid var(--border-color); background: #000; cursor: pointer; }
+        .grid-display { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
         
-        .main-col { display: flex; flex-direction: column; gap: 30px; }
-        .grid-display { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
-        
-        .item-card { background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border-color); transition: 0.3s; cursor: pointer; position: relative; overflow: hidden; }
-        .item-card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
-        .item-card img { width: 100%; height: 240px; object-fit: cover; border-radius: 8px 8px 0 0; }
-        .item-info { padding: 10px; text-align: center; }
+        /* الكارت بتصميمك الأصلي */
+        .item-card { 
+            background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border-color);
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; cursor: pointer;
+        }
+        .item-card:hover { transform: scale(1.1); z-index: 100; border-color: var(--primary); box-shadow: var(--shadow); }
+        .item-card img { width: 100%; height: 270px; object-fit: cover; border-radius: 10px 10px 0 0; }
 
-        /* --- صفحة التعديل (طبق الأصل من العرض) --- */
-        .admin-modal-full { position: fixed; inset: 0; background: var(--bg-dark); display: none; flex-direction: column; z-index: 5000; overflow-y: auto; padding-bottom: 50px; }
-        .edit-hero-bg { height: 450px; position: relative; background-size: cover; background-position: center; border-bottom: 3px solid var(--primary); display: flex; align-items: flex-end; padding: 40px; }
-        .edit-hero-bg::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, var(--bg-dark), transparent); }
-        
-        .upload-controls { position: absolute; top: 20px; right: 20px; display: flex; gap: 10px; z-index: 10; background: rgba(0,0,0,0.7); padding: 10px; border-radius: 8px; border: 1px solid var(--primary); }
-        .btn-sm { background: var(--primary); color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
-        .input-url { background: rgba(255,255,255,0.1); border: 1px solid #555; color: white; padding: 6px; border-radius: 4px; font-size: 12px; width: 150px; }
+        /* تفاصيل الهوفر (Hover Details) */
+        .hover-details { 
+            position: absolute; bottom: 0; left: 0; width: 100%; 
+            background: rgba(10, 10, 10, 0.98); padding: 15px; 
+            opacity: 0; visibility: hidden; transition: 0.3s;
+            border-top: 1px solid var(--primary); border-radius: 0 0 10px 10px;
+        }
+        .item-card:hover .hover-details { opacity: 1; visibility: visible; }
+        .item-name { font-size: 14px; font-weight: bold; margin-bottom: 5px; text-align: center; }
+        .item-meta { display: flex; justify-content: center; gap: 10px; font-size: 11px; color: var(--primary); }
 
-        .edit-content { display: flex; gap: 40px; max-width: 1200px; margin: -100px auto 0; padding: 0 20px; position: relative; z-index: 5; width: 100%; }
-        .edit-poster { width: 220px; height: 330px; border-radius: 10px; border: 2px solid var(--primary); background-size: cover; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.9); }
-        
-        .transparent-input { background: transparent; border: none; color: white; width: 100%; font-family: inherit; }
-        .transparent-input:focus { outline: none; border-bottom: 1px solid var(--primary); }
-        .edit-title-input { font-size: 45px; font-weight: 900; margin-bottom: 15px; border-bottom: 2px dashed #444; }
-        .edit-desc-input { font-size: 16px; line-height: 1.6; color: #ccc; margin-top: 20px; width: 100%; min-height: 100px; background: rgba(255,255,255,0.02); padding: 10px; border: 1px dashed #444; }
+        /* =========================================
+           5. السايد بار (Sidebars)
+           ========================================= */
+        .sidebar { background: #111; border: 1px solid var(--border-color); border-radius: 10px; height: fit-content; position: sticky; top: 95px; }
+        .side-head { background: #1a1a1a; padding: 15px; color: var(--primary); font-weight: bold; text-align: center; border-bottom: 1px solid var(--border-color); }
+        .side-list { padding: 10px; }
+        .side-item { display: flex; gap: 12px; padding: 10px; border-bottom: 1px solid #1a1a1a; transition: 0.2s; cursor: pointer; }
+        .side-item:hover { background: #181818; }
+        .side-item img { width: 50px; height: 75px; border-radius: 5px; object-fit: cover; }
 
-        /* --- الحلقات والباليتة --- */
-        .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; margin-top: 20px; }
-        .ep-card { background: #111; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; text-align: center; }
-        .ep-card img { width: 100%; height: 80px; object-fit: cover; border-radius: 4px; margin-bottom: 10px; }
-        .palette-box { display: grid; grid-template-columns: repeat(8, 1fr); gap: 10px; padding: 15px; }
-        .color-dot { width: 25px; height: 25px; border-radius: 50%; cursor: pointer; border: 1px solid #fff; }
+        /* =========================================
+           6. وضع الإدارة (Admin Tools) - تعديل حي
+           ========================================= */
+        [contenteditable="true"] { outline: none; border: 1px dashed transparent; }
+        [contenteditable="true"]:focus { border-color: var(--primary); background: rgba(155, 81, 224, 0.05); }
+
+        .admin-controls { position: fixed; bottom: 20px; right: 20px; z-index: 5000; display: flex; flex-direction: column; gap: 10px; }
+        .admin-btn { 
+            background: var(--primary); color: white; border: none; padding: 12px 20px; 
+            border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: var(--shadow);
+            display: flex; align-items: center; gap: 8px; transition: 0.3s;
+        }
+        .admin-btn:hover { transform: translateY(-3px); filter: brightness(1.2); }
+        .btn-delete { background: #ff4757; font-size: 10px; padding: 5px; position: absolute; top: 5px; left: 5px; border-radius: 4px; display: none; }
+        .item-card:hover .btn-delete { display: block; }
+
+        /* شريط التعديل العملاق للحلقات */
+        #episodeEditor { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; 
+            display: none; padding: 50px; overflow-y: auto;
+        }
+        .editor-content { max-width: 1000px; margin: 0 auto; background: #111; padding: 30px; border-radius: 15px; border: 1px solid var(--primary); }
+
+        @media (max-width: 1200px) { .main-wrapper { grid-template-columns: 1fr; } .sidebar { display: none; } }
     </style>
 </head>
 <body>
 
     <header class="header">
-        <div class="logo-box">
-            <img src="https://i.ibb.co/5ggRsXdV/Red-Black-Modern-Movie-Cinema-Presentation-20260311-124846.jpg" id="siteLogoImg" onclick="document.getElementById('logoControls').classList.toggle('hidden')">
-            <span id="siteTitleText" style="font-weight: bold; font-size: 24px;">WATCH<span style="color: var(--primary);">GO</span></span>
-            
-            <div id="logoControls" class="upload-controls hidden" style="top: 55px; left: 0; right: auto;">
-                <input type="text" id="logoUrl" class="input-url" placeholder="رابط اللوجو" onchange="updateImage('siteLogoImg', this.value, false)">
-                <span style="font-size:12px;">أو</span>
-                <input type="file" hidden id="logoFile" accept="image/*" onchange="uploadLocalImage(this, 'siteLogoImg', false)">
-                <button class="btn-sm" onclick="document.getElementById('logoFile').click()">من الاستوديو</button>
-            </div>
+        <div class="logo-ctn" onclick="triggerFileUpload('logoImg')">
+            <img src="https://i.ibb.co/5ggRsXdV/Red-Black-Modern-Movie-Cinema-Presentation-20260311-124846.jpg" id="logoImg">
+            <span contenteditable="true" style="font-weight: 900; font-size: 24px;">WATCH<span style="color: var(--primary);">GO</span></span>
         </div>
-        
-        <div style="display:flex; gap:20px; align-items:center;">
-            <i class="fa-solid fa-magnifying-glass" onclick="toggleSearch()" style="cursor:pointer; font-size:20px;"></i>
-            <i class="fa-solid fa-palette" onclick="document.getElementById('paletteModal').style.display='flex'" style="cursor:pointer; color:var(--primary); font-size:20px;"></i>
-            <button onclick="addNewSection()" style="background:var(--primary); color:white; border:none; padding:10px 20px; border-radius:5px; font-weight:bold; cursor:pointer;">+ قسم جديد</button>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="#" contenteditable="true">الرئيسية</a></li>
+                <li><a href="#" contenteditable="true">الأفلام</a></li>
+                <li><a href="#" contenteditable="true">المسلسلات</a></li>
+                <li><a href="#" contenteditable="true">رمضان 2026</a></li>
+            </ul>
+        </nav>
+        <div class="header-icons">
+            <i class="fa-solid fa-magnifying-glass" style="cursor:pointer; color:var(--primary);"></i>
         </div>
     </header>
 
-    <div id="searchBox">
-        <center><input type="text" id="searchInput" placeholder="ابحث عن فيلم أو مسلسل..." onkeyup="filterContent(this.value)"></center>
-    </div>
-
-    <div class="slider-container">
-        <div id="heroSection">
-            <div id="sliderWrapper" style="width:100%; height:100%; background:url('https://i.ibb.co/5ggRsXdV/Red-Black-Modern-Movie-Cinema-Presentation-20260311-124846.jpg') center/cover;">
-                <div style="position:absolute; bottom:0; background:linear-gradient(to top, #000, transparent); width:100%; padding:40px;">
-                    <h2 style="font-size:40px;">فيلم السهرة الافتراضي</h2>
+    <section class="hero-container">
+        <div class="hero-slider" id="mainSlider">
+            <div class="slide-item active" style="background-image: url('https://via.placeholder.com/1200x450')" id="slide1">
+                <div class="slide-overlay">
+                    <h2 class="slide-title" contenteditable="true">عنوان الفيلم الرئيسي</h2>
+                    <p class="slide-desc" contenteditable="true">اكتب هنا وصفاً جذاباً للفيلم المعروض في السلايدر. هذا الوصف يظهر بوضوح فوق الخلفية المغمشة.</p>
+                    <div style="display:flex; gap:10px;">
+                        <button class="admin-btn" onclick="triggerFileUpload('slide1', true)">تغيير الخلفية</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="main-container">
+    </section>
+
+    <div class="main-wrapper">
+        
         <aside class="sidebar">
-            <div style="background:#1a1a1a; padding:12px; font-weight:bold; color:var(--primary); text-align:center; margin-bottom:15px;">أعلى التقييمات</div>
-            <div id="topRatedSide" style="display:flex; flex-direction:column; gap:10px;">
-                <div style="display:flex; gap:10px; align-items:center; border-bottom:1px solid #222; padding-bottom:10px;">
-                    <img src="https://via.placeholder.com/50x70" style="border-radius:4px;">
-                    <div><p style="font-size:14px;">فيلم أكشن</p><span style="color:gold; font-size:12px;">⭐ 9.5</span></div>
+            <div class="side-head" contenteditable="true">أعلى التقييمات</div>
+            <div class="side-list" id="topRatedList">
+                <div class="side-item">
+                    <img src="https://via.placeholder.com/50x75" onclick="triggerFileUpload(this)">
+                    <div style="font-size:13px; font-weight:bold;" contenteditable="true">فيلم تقييم عالي</div>
                 </div>
             </div>
+            <button class="admin-btn" style="width:90%; margin:10px auto;" onclick="addToSidebar('topRatedList')">+ إضافة</button>
         </aside>
 
-        <main class="main-col" id="sectionsContainer">
-            <section class="section-box" id="defaultSection">
-                <div class="section-title">أفلام قابلة للتعديل</div>
-                <div class="grid-display" id="grid_default">
-                    <div class="item-card" onclick="openFullEdit('1', 'ولاد رزق 3', 'قصة الفيلم هنا...', 'https://via.placeholder.com/300x450', 'https://via.placeholder.com/1200x500')">
-                        <img src="https://via.placeholder.com/300x450">
-                        <div class="item-info">
-                            <h4 style="font-size:14px;">ولاد رزق 3</h4>
-                            <button class="btn-sm" style="width:100%; margin-top:10px;">تعديل العمل</button>
+        <main>
+            <section style="margin-bottom:50px;">
+                <div class="section-title">
+                    <span contenteditable="true">🌙 مسلسلات رمضان 2026</span>
+                    <button class="admin-btn" style="padding:5px 10px; font-size:12px;" onclick="addNewMovie('ramadanGrid')">+ إضافة عمل</button>
+                </div>
+                <div class="grid-display" id="ramadanGrid">
+                    <div class="item-card">
+                        <button class="btn-delete" onclick="this.parentElement.remove()">حذف</button>
+                        <img src="https://via.placeholder.com/180x270" onclick="triggerFileUpload(this)">
+                        <div class="hover-details" onclick="openEpisodeEditor(this)">
+                            <div class="item-name" contenteditable="true">اسم المسلسل الرمضاني</div>
+                            <div class="item-meta"><span contenteditable="true">2026</span> | <span contenteditable="true">★ 9.0</span></div>
                         </div>
                     </div>
                 </div>
-                <button onclick="openFullEdit('new', '', '', '', '', 'grid_default')" style="width:100%; padding:10px; background:#1a1a1a; border:1px dashed #444; color:white; margin-top:15px; cursor:pointer;">+ إضافة عمل جديد هنا</button>
+            </section>
+
+            <section>
+                <div class="section-title">
+                    <span contenteditable="true">🔥 أفلام حصرية</span>
+                    <button class="admin-btn" style="padding:5px 10px; font-size:12px;" onclick="addNewMovie('moviesGrid')">+ إضافة عمل</button>
+                </div>
+                <div class="grid-display" id="moviesGrid"></div>
             </section>
         </main>
 
         <aside class="sidebar">
-            <div style="background:#1a1a1a; padding:12px; font-weight:bold; color:var(--primary); text-align:center; margin-bottom:15px;">قد تعجبك (اقتراحات)</div>
-            <div id="recommendSide" style="display:flex; flex-direction:column; gap:10px;">
-                <div style="display:flex; gap:10px; align-items:center; border-bottom:1px solid #222; padding-bottom:10px;">
-                    <img src="https://via.placeholder.com/50x70" style="border-radius:4px;">
-                    <div><p style="font-size:14px;">مسلسل دراما</p><span style="color:var(--primary); font-size:12px;">رائج الآن</span></div>
-                </div>
-            </div>
+            <div class="side-head" contenteditable="true">عالم الأنمي</div>
+            <div class="side-list" id="animeList"></div>
+            <button class="admin-btn" style="width:90%; margin:10px auto;" onclick="addToSidebar('animeList')">+ إضافة أنمي</button>
         </aside>
     </div>
 
-    <div id="fullEditModal" class="admin-modal-full">
-        <div class="edit-hero-bg" id="editHeroBg" style="background-image: url('https://via.placeholder.com/1200x500');">
-            <div class="upload-controls">
-                <span style="font-size:12px; color:#fff; align-self:center;">الغلاف:</span>
-                <input type="text" id="bgUrlInput" class="input-url" placeholder="رابط مباشر" onchange="updateImage('editHeroBg', this.value, true)">
-                <input type="file" hidden id="bgFileInput" accept="image/*" onchange="uploadLocalImage(this, 'editHeroBg', true)">
-                <button class="btn-sm" onclick="document.getElementById('bgFileInput').click()">من الاستوديو</button>
-            </div>
-        </div>
-
-        <div class="edit-content">
-            <div style="position:relative;">
-                <div class="edit-poster" id="editPosterBg" style="background-image: url('https://via.placeholder.com/300x450');"></div>
-                <div style="background:#111; padding:10px; border:1px solid #333; border-radius:8px; margin-top:10px; text-align:center;">
-                    <p style="font-size:12px; margin-bottom:5px;">تغيير البوستر:</p>
-                    <input type="text" id="posterUrlInput" class="input-url" style="width:100%; margin-bottom:5px;" placeholder="رابط البوستر" onchange="updateImage('editPosterBg', this.value, true)">
-                    <input type="file" hidden id="posterFileInput" accept="image/*" onchange="uploadLocalImage(this, 'editPosterBg', true)">
-                    <button class="btn-sm" style="width:100%;" onclick="document.getElementById('posterFileInput').click()">رفع من الاستوديو</button>
+    <div id="episodeEditor">
+        <div class="editor-content">
+            <h2 style="color:var(--primary); margin-bottom:20px;">تعديل تفاصيل العمل والحلقات</h2>
+            <div style="display:grid; grid-template-columns: 200px 1fr; gap:30px;">
+                <div id="editorPosterCtn">
+                    <img src="" id="editorPoster" style="width:100%; border-radius:10px; border:2px solid var(--primary);">
+                    <button class="admin-btn" style="width:100%; margin-top:10px;" onclick="triggerFileUpload('editorPoster')">تغيير البوستر</button>
+                </div>
+                <div>
+                    <input type="text" id="editorTitle" placeholder="اسم العمل" style="width:100%; background:#222; border:1px solid #444; color:white; padding:15px; margin-bottom:15px; font-size:20px;">
+                    <textarea id="editorStory" placeholder="قصة العمل..." style="width:100%; background:#222; border:1px solid #444; color:white; padding:15px; height:100px;"></textarea>
+                    
+                    <div style="margin-top:20px;">
+                        <h3 style="margin-bottom:10px;">إضافة سيرفرات / حلقات:</h3>
+                        <div id="linksCtn"></div>
+                        <button class="admin-btn" onclick="addLinkField()">+ إضافة سيرفر جديد</button>
+                    </div>
                 </div>
             </div>
-            
-            <div style="flex:1; padding-top:20px;">
-                <input type="text" id="editItemTitle" class="transparent-input edit-title-input" placeholder="اسم الفيلم أو المسلسل هنا...">
-                <div style="display:flex; gap:20px; margin-bottom:20px;">
-                    <input type="text" id="editItemRate" class="transparent-input" style="width:150px; font-size:18px; border-bottom:1px solid #444;" placeholder="⭐ التقييم (مثال: 9.5)">
-                    <input type="text" id="editItemYear" class="transparent-input" style="width:150px; font-size:18px; border-bottom:1px solid #444;" placeholder="سنة الإصدار (2025)">
-                </div>
-                <textarea id="editItemDesc" class="transparent-input edit-desc-input" placeholder="اكتب قصة العمل هنا (التعديل متاح مباشرة)..."></textarea>
-
-                <div style="margin-top:40px; border-top:2px solid #222; padding-top:20px;">
-                    <h3 style="color:var(--primary); margin-bottom:15px;">🎞️ المواسم / الحلقات / الأجزاء</h3>
-                    <div id="episodesArea" class="episodes-grid"></div>
-                    <button onclick="addBlankEpisode()" style="width:100%; padding:15px; margin-top:20px; background:#1a1a1a; border:1px dashed var(--primary); color:var(--primary); cursor:pointer; border-radius:8px; font-weight:bold;">+ إضافة حلقة أو جزء جديد</button>
-                </div>
-
-                <div style="margin-top:50px; display:flex; gap:20px;">
-                    <button onclick="saveFullEdits()" style="flex:2; padding:15px; background:var(--primary); color:white; border:none; border-radius:8px; font-size:18px; font-weight:bold; cursor:pointer;">💾 حفظ التعديلات ونشر العمل</button>
-                    <button onclick="closeFullEdit()" style="flex:1; background:#333; color:white; border:none; border-radius:8px; cursor:pointer;">إلغاء</button>
-                </div>
+            <div style="margin-top:30px; display:flex; gap:10px; justify-content: flex-end;">
+                <button class="admin-btn" style="background:#444;" onclick="closeEditor()">إلغاء</button>
+                <button class="admin-btn" onclick="saveEditorChanges()">حفظ البيانات النهائية</button>
             </div>
         </div>
     </div>
-    <div id="paletteModal" class="admin-modal-full" style="justify-content:center; align-items:center; background:rgba(0,0,0,0.95);">
-        <div style="background:#111; padding:30px; border-radius:15px; width:400px; border:1px solid var(--primary);">
-            <h3 style="text-align:center; margin-bottom:20px; color:white;">اختر لون الموقع</h3>
-            <div class="palette-box" id="paletteGrid"></div>
-            <button onclick="document.getElementById('paletteModal').style.display='none'" style="width:100%; margin-top:20px; padding:12px; background:#333; border:none; color:white; border-radius:8px;">إغلاق</button>
+
+    <div class="admin-controls">
+        <button class="admin-btn" style="background:#2ecc71;" onclick="exportFinalHTML()"><i class="fa-solid fa-code"></i> استخراج الكود النهائي</button>
+        <div style="background:rgba(0,0,0,0.8); padding:10px; border-radius:8px; font-size:12px; border:1px solid var(--primary);">
+            💡 نصيحة: اضغط على أي نص لتعديله، وعلى أي صورة لتغييرها.
         </div>
     </div>
 
-    <style>.hidden { display: none !important; }</style>
+    <input type="file" id="fileInput" hidden onchange="handleFileSelect(this)">
 
     <script>
-        let currentTargetGrid = '';
+        let currentImgTarget = null;
+        let isBackgroundTarget = false;
+        let currentEditingCard = null;
 
-        // ==========================================
-        // 1. نظام الألوان (الباليتة)
-        // ==========================================
-        const colors = ["#9b51e0", "#e91e63", "#2196f3", "#4caf50", "#ff9800", "#f44336", "#00bcd4", "#8bc34a", "#ffeb3b", "#795548", "#607d8b", "#ff4081", "#7c4dff", "#00e5ff", "#00c853", "#ffd600", "#ff6d00", "#d500f9", "#3d5afe", "#1de9b6", "#c6ff00", "#ffea00", "#ff3d00", "#76ff03", "#00b0ff"];
-        const grid = document.getElementById('paletteGrid');
-        colors.forEach(c => {
-            const d = document.createElement('div');
-            d.className = 'color-dot';
-            d.style.backgroundColor = c;
-            d.onclick = () => {
-                document.documentElement.style.setProperty('--primary', c);
-                localStorage.setItem('siteTheme', c);
-            };
-            grid.appendChild(d);
-        });
-
-        // ==========================================
-        // 2. البحث الذكي (شغال 100%)
-        // ==========================================
-        function toggleSearch() {
-            const s = document.getElementById('searchBox');
-            s.style.display = s.style.display === 'block' ? 'none' : 'block';
+        // 1. نظام الرفع الذكي
+        function triggerFileUpload(target, isBg = false) {
+            currentImgTarget = typeof target === 'string' ? document.getElementById(target) : target;
+            isBackgroundTarget = isBg;
+            document.getElementById('fileInput').click();
         }
 
-        function filterContent(val) {
-            const cards = document.querySelectorAll('.item-card');
-            cards.forEach(card => {
-                const title = card.innerText.toLowerCase();
-                card.style.display = title.includes(val.toLowerCase()) ? 'block' : 'none';
-            });
-        }
-
-        // ==========================================
-        // 3. نظام الرفع المزدوج (رابط مباشر أو من الاستوديو)
-        // ==========================================
-        function updateImage(targetId, url, isBg) {
-            if(!url) return;
-            const el = document.getElementById(targetId);
-            if(isBg) el.style.backgroundImage = `url('${url}')`;
-            else el.src = url;
-        }
-
-        function uploadLocalImage(input, targetId, isBg) {
+        function handleFileSelect(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
-                reader.onload = (e) => {
-                    const el = document.getElementById(targetId);
-                    if(isBg) el.style.backgroundImage = `url('${e.target.result}')`;
-                    else el.src = e.target.result;
+                reader.onload = function(e) {
+                    if (isBackgroundTarget) {
+                        currentImgTarget.style.backgroundImage = `url('${e.target.result}')`;
+                    } else {
+                        currentImgTarget.src = e.target.result;
+                    }
                 };
                 reader.readAsDataURL(input.files[0]);
             }
         }
 
-        // ==========================================
-        // 4. الأقسام وإدارة الشاشة الشبيهة بالعرض
-        // ==========================================
-        function addNewSection() {
-            const name = prompt("اسم القسم الجديد:");
-            if(!name) return;
-            const id = Date.now();
+        // 2. نظام إضافة المحتوى للشبكة
+        function addNewMovie(gridId) {
+            const grid = document.getElementById(gridId);
+            const cardId = 'card_' + Date.now();
             const html = `
-                <section class="section-box" id="sec_${id}">
-                    <div class="section-title">
-                        <span>${name}</span>
-                        <i class="fa-solid fa-trash" style="cursor:pointer; color:#555;" onclick="this.closest('section').remove()"></i>
-                    </div>
-                    <div class="grid-display" id="grid_${id}"></div>
-                    <button onclick="openFullEdit('new', '', '', '', '', 'grid_${id}')" style="width:100%; padding:10px; background:#1a1a1a; border:1px dashed #444; color:white; margin-top:15px; cursor:pointer;">+ إضافة عمل لـ ${name}</button>
-                </section>`;
-            document.getElementById('sectionsContainer').insertAdjacentHTML('beforeend', html);
-        }
-
-        function openFullEdit(itemId, title, desc, poster, bg, targetGrid) {
-            if(targetGrid) currentTargetGrid = targetGrid;
-            const modal = document.getElementById('fullEditModal');
-            
-            // تعبئة البيانات الموجودة (إن وجدت)
-            document.getElementById('editItemTitle').value = title || "";
-            document.getElementById('editItemDesc').value = desc || "";
-            document.getElementById('editPosterBg').style.backgroundImage = `url('${poster || 'https://via.placeholder.com/300x450?text=Poster'}')`;
-            document.getElementById('editHeroBg').style.backgroundImage = `url('${bg || 'https://via.placeholder.com/1200x500?text=Backdrop'}')`;
-            
-            // تصفير روابط الإدخال
-            document.getElementById('bgUrlInput').value = "";
-            document.getElementById('posterUrlInput').value = "";
-            
-            // مسح الحلقات القديمة لتبدأ على نظافة
-            document.getElementById('episodesArea').innerHTML = "";
-            
-            modal.style.display = 'flex';
-            window.scrollTo(0,0);
-        }
-
-        function closeFullEdit() { document.getElementById('fullEditModal').style.display = 'none'; }
-
-        // ==========================================
-        // 5. إضافة الحلقات/الأجزاء (نظام البلانك / الممسوح + رفع مزدوج)
-        // ==========================================
-        function addBlankEpisode() {
-            const id = Date.now();
-            const html = `
-                <div class="ep-card" id="ep_${id}">
-                    <img id="epImg_${id}" src="https://via.placeholder.com/150x100?text=Upload+Photo">
-                    
-                    <div style="display:flex; gap:5px; margin-bottom:10px;">
-                        <input type="text" class="input-url" style="width:50%;" placeholder="رابط صورة" onchange="updateImage('epImg_${id}', this.value, false)">
-                        <input type="file" hidden id="epFile_${id}" accept="image/*" onchange="uploadLocalImage(this, 'epImg_${id}', false)">
-                        <button class="btn-sm" style="width:50%;" onclick="document.getElementById('epFile_${id}').click()">استوديو</button>
-                    </div>
-
-                    <input type="text" class="transparent-input" style="border:1px solid #333; padding:5px; margin-bottom:5px; font-size:12px; text-align:center;" placeholder="اسم الحلقة (الحلقة 1)">
-                    <input type="text" class="transparent-input" style="border:1px solid #333; padding:5px; font-size:12px; text-align:center;" placeholder="رابط الفيديو / المشاهدة">
-                    <button onclick="this.parentElement.remove()" style="width:100%; margin-top:10px; background:none; border:1px solid red; color:red; padding:5px; border-radius:4px; font-size:11px; cursor:pointer;">حذف الحلقة</button>
-                </div>`;
-            document.getElementById('episodesArea').insertAdjacentHTML('beforeend', html);
-        }
-
-        // ==========================================
-        // 6. حفظ البيانات ككارت جديد في الشبكة
-        // ==========================================
-        function saveFullEdits() {
-            const title = document.getElementById('editItemTitle').value;
-            // استخراج رابط البوستر الحالي (سواء كان مرفوع محلي أو برابط)
-            let posterStyle = document.getElementById('editPosterBg').style.backgroundImage;
-            let posterUrl = posterStyle.slice(5, -2).replace(/"/g, ""); // تنظيف الرابط
-
-            if(!title) return alert("يجب كتابة اسم العمل أولاً!");
-
-            const card = `
-                <div class="item-card">
-                    <img src="${posterUrl}">
-                    <div class="item-info">
-                        <h4 style="font-size:14px; margin-bottom:10px;">${title}</h4>
-                        <button class="btn-sm" style="width:100%;" onclick="openFullEdit('updated', '${title}', '', '${posterUrl}', '', '')">تعديل</button>
+                <div class="item-card" id="${cardId}">
+                    <button class="btn-delete" onclick="this.parentElement.remove()">حذف</button>
+                    <img src="https://via.placeholder.com/180x270" onclick="triggerFileUpload(this)">
+                    <div class="hover-details" onclick="openEpisodeEditor(this)">
+                        <div class="item-name" contenteditable="true">اسم العمل الجديد</div>
+                        <div class="item-meta"><span contenteditable="true">2026</span> | <span contenteditable="true">★ 0.0</span></div>
                     </div>
                 </div>`;
-            
-            if(currentTargetGrid && document.getElementById(currentTargetGrid)) {
-                document.getElementById(currentTargetGrid).insertAdjacentHTML('beforeend', card);
-            }
-            closeFullEdit();
+            grid.insertAdjacentHTML('afterbegin', html);
         }
 
-        // ==========================================
-        // 7. التشغيل المبدئي واسترجاع اللون
-        // ==========================================
-        window.onload = () => {
-            const savedTheme = localStorage.getItem('siteTheme');
-            if(savedTheme) document.documentElement.style.setProperty('--primary', savedTheme);
-        };
+        // 3. نظام إضافة للسايد بار
+        function addToSidebar(listId) {
+            const list = document.getElementById(listId);
+            const html = `
+                <div class="side-item">
+                    <img src="https://via.placeholder.com/50x75" onclick="triggerFileUpload(this)">
+                    <div style="font-size:13px; font-weight:bold;" contenteditable="true">عنوان جديد</div>
+                </div>`;
+            list.insertAdjacentHTML('beforeend', html);
+        }
+
+        // 4. محرر الحلقات والروابط
+        function openEpisodeEditor(detailsDiv) {
+            currentEditingCard = detailsDiv.closest('.item-card');
+            const title = currentEditingCard.querySelector('.item-name').innerText;
+            const poster = currentEditingCard.querySelector('img').src;
+            
+            document.getElementById('editorTitle').value = title;
+            document.getElementById('editorPoster').src = poster;
+            document.getElementById('episodeEditor').style.display = 'block';
+            
+            // تحميل روابط وهمية أو مخزنة
+            document.getElementById('linksCtn').innerHTML = '';
+            addLinkField("سيرفر مشاهدة 1", "https://...");
+        }
+
+        function addLinkField(name = "", url = "") {
+            const html = `
+                <div style="display:flex; gap:5px; margin-bottom:10px;">
+                    <input type="text" placeholder="اسم السيرفر" value="${name}" style="flex:1; background:#333; border:none; color:white; padding:10px;">
+                    <input type="text" placeholder="الرابط" value="${url}" style="flex:2; background:#333; border:none; color:white; padding:10px;">
+                </div>`;
+            document.getElementById('linksCtn').insertAdjacentHTML('beforeend', html);
+        }
+
+        function saveEditorChanges() {
+            const newTitle = document.getElementById('editorTitle').value;
+            const newPoster = document.getElementById('editorPoster').src;
+            
+            currentEditingCard.querySelector('.item-name').innerText = newTitle;
+            currentEditingCard.querySelector('img').src = newPoster;
+            
+            closeEditor();
+        }
+
+        function closeEditor() { document.getElementById('episodeEditor').style.display = 'none'; }
+
+        // 5. استخراج الكود النهائي (للنسخ والحفظ)
+        function exportFinalHTML() {
+            // تنظيف الكود من أدوات الإدارة قبل التصدير
+            const clone = document.documentElement.cloneNode(true);
+            clone.querySelectorAll('.admin-controls, .admin-btn, .btn-delete, #fileInput').forEach(el => el.remove());
+            clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+            
+            const blob = new Blob([clone.outerHTML], {type: 'text/html'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'WatchGo_Final_Site.html';
+            a.click();
+            alert("تم تجهيز نسخة نظيفة من الموقع للتحميل!");
+        }
+
+        // تنبيه بسيط
+        console.log("WatchGo Engine Started... Ready for Mhamed's commands.");
     </script>
 </body>
 </html>
