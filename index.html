@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WatchGo - Smart Cinema Hub (مطور متكامل)</title>
+    <title>WatchGo - Smart Cinema Hub (مطور)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { 
@@ -13,6 +13,7 @@
             --border-color: #222;  
             --netflix-red: #e50914;  
             --edit-border: #4caf50;
+            --edit-glow: rgba(76, 175, 80, 0.4);
         }  
 
         * { box-sizing: border-box; margin: 0; padding: 0; }  
@@ -64,7 +65,7 @@
         #searchBox input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(155, 81, 224, 0.3); }  
 
         /* --- السلايدر --- */  
-        .slider-container { max-width: 1620px; margin: 20px auto; padding: 0 40px; position: relative; }  
+        .slider-container { max-width: 1620px; margin: 20px auto; padding: 0 40px; }  
         #heroSection { width: 100%; height: 420px; position: relative; overflow: hidden; border-radius: 15px; border: 1px solid var(--border-color); background: #000; }  
         .slider-wrapper { display: flex; width: 100%; height: 100%; transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); }  
         .slide { min-width: 100%; height: 100%; background-size: cover; background-position: center 20%; position: relative; }  
@@ -86,7 +87,12 @@
         .meta-info span { border: 1px solid #333; padding: 2px 6px; border-radius: 3px; background: #000; }  
         .watch-btn { background: var(--primary); color: #fff; font-size: 12px; padding: 8px; border-radius: 4px; font-weight: bold; display: block; text-align: center; text-decoration: none; }  
 
-        /* --- الحاويات --- */  
+        /* --- الترقيم --- */  
+        .pagination-container { display: flex; justify-content: center; gap: 8px; margin-top: 25px; margin-bottom: 10px; }  
+        .page-btn { background: #1a1a1a; color: #fff; border: 1px solid #333; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; transition: 0.3s; min-width: 35px; }  
+        .page-btn:hover, .page-btn.active { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 8px var(--primary); }  
+
+        /* الحاويات */  
         .container { padding: 20px 40px; display: grid; grid-template-columns: 280px 1fr 280px; gap: 25px; max-width: 1700px; margin: 0 auto; }  
         .section-box { margin-bottom: 50px; position: relative; }  
         .section-title { background: #111; padding: 12px 20px; font-size: 17px; font-weight: bold; margin-bottom: 20px; border-right: 5px solid var(--primary); display: flex; align-items: center; gap: 10px; }  
@@ -100,28 +106,60 @@
 
         .no-results { text-align: center; padding: 50px; font-size: 20px; color: #777; width: 100%; }  
         .hidden { display: none !important; }  
-        .loading-indicator { text-align: center; padding: 20px; color: var(--primary); }  
 
-        /* وضع التحرير */  
+        /* وضع التحرير - أنماط إضافية */  
         .edit-mode-enabled [contenteditable="true"] {  
             outline: 2px dashed var(--edit-border);  
             background-color: rgba(76, 175, 80, 0.1);  
             cursor: text;  
+            transition: 0.1s;  
         }  
-        .delete-item-btn, .delete-slide-btn {  
-            position: absolute; top: -10px; right: -10px; background: #e50914; color: white;  
-            border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center;  
-            justify-content: center; font-size: 12px; cursor: pointer; z-index: 200;  
+        .edit-mode-enabled .editable-element {  
+            position: relative;  
         }  
-        .edit-slider-btn { position: absolute; top: 15px; left: 15px; background: var(--primary); padding: 6px 12px; border-radius: 20px; cursor: pointer; z-index: 100; font-size: 12px; }  
-        .add-movie-btn, .add-section-btn { background: var(--primary); padding: 6px 12px; margin-top: 10px; border-radius: 20px; font-size:12px; cursor:pointer; width:fit-content; }  
-
-        /* مودال */  
-        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; align-items: center; justify-content: center; }  
-        .modal-content { background: #111; border-radius: 12px; width: 90%; max-width: 500px; padding: 25px; border-top: 4px solid var(--primary); }  
-        .modal-content input, .modal-content select, .modal-content textarea { width:100%; padding: 12px; margin: 10px 0; background: #1a1a1a; border:1px solid #333; color:white; border-radius: 8px; }  
-        .modal-buttons { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }  
-        .modal-buttons button { padding: 8px 16px; border-radius: 6px; cursor: pointer; }  
+        .edit-mode-enabled .edit-icon {  
+            position: absolute;  
+            top: -12px;  
+            left: -12px;  
+            background: var(--edit-border);  
+            color: white;  
+            border-radius: 50%;  
+            width: 24px;  
+            height: 24px;  
+            display: flex;  
+            align-items: center;  
+            justify-content: center;  
+            font-size: 12px;  
+            cursor: pointer;  
+            z-index: 1000;  
+            opacity: 0.9;  
+        }  
+        .edit-mode-enabled .delete-item-btn {  
+            position: absolute;  
+            top: -12px;  
+            right: -12px;  
+            background: #e50914;  
+            color: white;  
+            border-radius: 50%;  
+            width: 24px;  
+            height: 24px;  
+            display: flex;  
+            align-items: center;  
+            justify-content: center;  
+            font-size: 12px;  
+            cursor: pointer;  
+            z-index: 1000;  
+        }  
+        .edit-mode-enabled .add-movie-btn, .add-section-btn {  
+            display: inline-block;  
+            background: var(--primary);  
+            padding: 6px 12px;  
+            margin: 10px 0;  
+            border-radius: 20px;  
+            font-size: 12px;  
+            cursor: pointer;  
+        }  
+        .add-section-btn { margin-right: 20px; }  
 
         @media (max-width: 1200px) { .container { grid-template-columns: 1fr; } .sidebar { display: none; } .main-nav { display: none; } }  
     </style>
@@ -134,214 +172,390 @@
     </a>  
     <nav class="main-nav" id="mainNav">  
         <div class="nav-item"><a class="nav-link" href="#" data-nav-original="الرئيسية">الرئيسية</a></div>  
-        <div class="nav-item"><span class="nav-link">الأفلام <i class="fa-solid fa-chevron-down"></i></span><div class="dropdown" data-dropdown="movies"><a href="#" onclick="showFull('discover/movie', 'أفلام مصرية', 'egypt')">أفلام مصرية</a><a href="#" onclick="showFull('discover/movie', 'أفلام عربية', 'arabic_only')">أفلام عربية</a><a href="#" onclick="showFull('discover/movie', 'أفلام أجنبية', 'en')">أفلام أجنبية</a><a href="#" onclick="showFull('discover/movie', 'أفلام رعب', '27')">أفلام رعب</a><a href="#" onclick="showFull('discover/movie', 'أفلام أكشن', '28')">أفلام أكشن</a></div></div>  
-        <div class="nav-item"><span class="nav-link">المسلسلات <i class="fa-solid fa-chevron-down"></i></span><div class="dropdown" data-dropdown="tv"><a href="#" onclick="showFull('discover/tv', 'مسلسلات رمضان 2026', 'ramadan')">مسلسلات رمضان 2026</a><a href="#" onclick="showFull('discover/tv', 'مسلسلات Netflix', 'netflix')" class="nav-netflix">مسلسلات Netflix</a><a href="#" onclick="showFull('discover/tv', 'مسلسلات مصرية', 'eg-tv')">مسلسلات مصرية</a><a href="#" onclick="showFull('discover/tv', 'مسلسلات أجنبية', 'en-tv')">مسلسلات أجنبية</a></div></div>  
-        <div class="nav-item"><a class="nav-link" href="#" onclick="showFull('discover/movie', 'عالم الأنمي', '16')">أنمي</a></div>  
+        <div class="nav-item">  
+            <span class="nav-link" data-nav-original="الأفلام">الأفلام <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i></span>  
+            <div class="dropdown" data-dropdown="movies">  
+                <a href="#" onclick="showFull('discover/movie', 'أفلام مصرية', 'egypt')" data-original-text="أفلام مصرية">أفلام مصرية</a>  
+                <a href="#" onclick="showFull('discover/movie', 'أفلام عربية', 'arabic_only')" data-original-text="أفلام عربية">أفلام عربية</a>  
+                <a href="#" onclick="showFull('discover/movie', 'أفلام أجنبية', 'en')" data-original-text="أفلام أجنبية">أفلام أجنبية</a>  
+                <a href="#" onclick="showFull('discover/movie', 'أفلام رعب', '27')" data-original-text="أفلام رعب">أفلام رعب</a>  
+                <a href="#" onclick="showFull('discover/movie', 'أفلام أكشن', '28')" data-original-text="أفلام أكشن">أفلام أكشن</a>  
+            </div>  
+        </div>  
+        <div class="nav-item">  
+            <span class="nav-link" data-nav-original="المسلسلات">المسلسلات <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i></span>  
+            <div class="dropdown" data-dropdown="tv">  
+                <a href="#" onclick="showFull('discover/tv', 'مسلسلات رمضان 2026', 'ramadan')" data-original-text="مسلسلات رمضان 2026">مسلسلات رمضان 2026</a>  
+                <a href="#" onclick="showFull('discover/tv', 'مسلسلات Netflix', 'netflix')" class="nav-netflix" data-original-text="مسلسلات Netflix">مسلسلات Netflix</a>  
+                <a href="#" onclick="showFull('discover/tv', 'مسلسلات مصرية', 'eg-tv')" data-original-text="مسلسلات مصرية">مسلسلات مصرية</a>  
+                <a href="#" onclick="showFull('discover/tv', 'مسلسلات أجنبية', 'en-tv')" data-original-text="مسلسلات أجنبية">مسلسلات أجنبية</a>  
+            </div>  
+        </div>  
+        <div class="nav-item"><a class="nav-link" href="#" onclick="showFull('discover/movie', 'عالم الأنمي', '16')" data-nav-original="أنمي">أنمي</a></div>  
     </nav>  
     <div class="header-icons">  
         <i class="fa-solid fa-magnifying-glass icon-btn" onclick="toggleSearch()"></i>  
-        <i class="fa-solid fa-palette icon-btn" id="colorPickerBtn"></i>  
-        <i class="fa-solid fa-gear icon-btn" id="toggleEditModeBtn"></i>  
+        <i class="fa-solid fa-gear icon-btn" id="toggleEditModeBtn" style="color: #ccc;"></i>  
     </div>  
 </header>  
 
-<div id="searchBox"><center><input type="text" id="searchInput" placeholder="ابحث..." onkeyup="smartSearch(this.value)"><p style="margin-top:10px; font-size:12px; color:var(--primary);">اكتب حرفين على الأقل</p></center></div>  
+<div id="searchBox">  
+    <center>  
+        <input type="text" id="searchInput" placeholder="ابحث عن اسم الفيلم أو المسلسل (عربي أو English)..." onkeyup="smartSearch(this.value)">  
+        <p style="margin-top:10px; font-size:12px; color:var(--primary);">اكتب حرفين على الأقل للبحث...</p>  
+    </center>  
+</div>  
 
 <div class="slider-container" id="sliderArea">  
     <div id="heroSection"><div class="slider-wrapper" id="sliderWrapper"></div></div>  
 </div>  
 
 <div class="container">  
-    <aside class="sidebar"><div class="side-title" id="bestSideTitle">أعلى التقييمات</div><div class="side-list" id="bestMoviesSide"></div></aside>  
+    <aside class="sidebar">  
+        <div class="side-title" id="bestSideTitle">أعلى التقييمات</div>  
+        <div class="side-list" id="bestMoviesSide"></div>  
+    </aside>  
+
     <main class="main-col" id="mainCol">  
         <div id="mainDisplay">  
-            <section class="section-box" data-section-key="ramadan" data-type="tv" data-cat="ramadan" data-url="discover/tv"><div class="section-title"><span><i class="fa-solid fa-moon"></i> <span class="section-title-text">مسلسلات رمضان 2026</span></span></div><div class="grid-display" id="ramadanGrid"></div><div class="infinite-scroll-trigger" data-section="ramadan"></div></section>  
-            <section class="section-box" data-section-key="egypt" data-type="movie" data-cat="egypt" data-url="discover/movie"><div class="section-title"><span><i class="fa-solid fa-star"></i> <span class="section-title-text">أحدث الأفلام المصرية</span></span></div><div class="grid-display" id="egyptGrid"></div><div class="infinite-scroll-trigger" data-section="egypt"></div></section>  
-            <section class="section-box" data-section-key="arabic" data-type="movie" data-cat="arabic_only" data-url="discover/movie"><div class="section-title"><span><i class="fa-solid fa-flag"></i> <span class="section-title-text">أفلام عربية منوعة</span></span></div><div class="grid-display" id="arabicGrid"></div><div class="infinite-scroll-trigger" data-section="arabic"></div></section>  
-            <section class="section-box" data-section-key="global" data-type="movie" data-cat="" data-url="discover/movie"><div class="section-title"><span><i class="fa-solid fa-globe"></i> <span class="section-title-text">أحدث الأفلام العالمية</span></span></div><div class="grid-display" id="moviesGrid"></div><div class="infinite-scroll-trigger" data-section="global"></div></section>  
+            <section class="section-box" data-section-key="ramadan">  
+                <div class="section-title"><span><i class="fa-solid fa-moon" style="color: #f1c40f;"></i> <span class="section-title-text" data-original="مسلسلات رمضان 2026">مسلسلات رمضان 2026</span></span></div>  
+                <div class="grid-display" id="ramadanGrid"></div>  
+                <div class="pagination-container" id="ramadanPag"></div>  
+            </section>  
+
+            <section class="section-box" data-section-key="egypt">  
+                <div class="section-title"><span><i class="fa-solid fa-star" style="color: #e74c3c;"></i> <span class="section-title-text" data-original="أحدث الأفلام المصرية">أحدث الأفلام المصرية</span></span></div>  
+                <div class="grid-display" id="egyptGrid"></div>  
+                <div class="pagination-container" id="egyptPag"></div>  
+            </section>  
+
+            <section class="section-box" data-section-key="arabic">  
+                <div class="section-title"><span><i class="fa-solid fa-flag" style="color: #3498db;"></i> <span class="section-title-text" data-original="أفلام عربية منوعة">أفلام عربية منوعة</span></span></div>  
+                <div class="grid-display" id="arabicGrid"></div>  
+                <div class="pagination-container" id="arabicPag"></div>  
+            </section>  
+
+            <section class="section-box" data-section-key="global">  
+                <div class="section-title"><span><i class="fa-solid fa-globe" style="color: #2ecc71;"></i> <span class="section-title-text" data-original="أحدث الأفلام العالمية">أحدث الأفلام العالمية</span></span></div>  
+                <div class="grid-display" id="moviesGrid"></div>  
+                <div class="pagination-container" id="moviesPag"></div>  
+            </section>  
         </div>  
-        <div id="fullView" class="hidden"><div class="section-box"><div class="section-title" id="fullTitle"></div><div class="grid-display" id="fullGrid"></div><div class="infinite-scroll-trigger" data-section="full"></div></div></div>  
+
+        <div id="fullView" class="hidden">  
+            <div class="section-box">  
+                <div class="section-title" id="fullTitle">تصفح الكل</div>  
+                <div class="grid-display" id="fullGrid"></div>  
+                <div class="pagination-container" id="fullPag"></div>  
+            </div>  
+        </div>  
         <div id="extraSectionsContainer"></div>  
     </main>  
-    <aside class="sidebar"><div class="side-title" id="animeSideTitle">عالم الأنمي</div><div class="side-list" id="animeSide"></div></aside>  
+
+    <aside class="sidebar">  
+        <div class="side-title" id="animeSideTitle">عالم الأنمي</div>  
+        <div class="side-list" id="animeSide"></div>  
+    </aside>  
 </div>  
 
 <script>  
     const BASE_URL = 'https://script.google.com/macros/s/AKfycbw4GkkBMwuUqmeMBYUNV1u0LvQvMla1MgM6ActKpZsdhVvPUnUqdi1StaL_1KkEgniV2A/exec';  
     let editMode = false;  
-    let customMovies = {}; let extraSections = []; let hiddenMovies = {};  
-    let infiniteState = {}; // page, loading, hasMore  
-    let currentFullState = null;  
-    let sliderMovies = []; let sliderInterval;  
+    let customMovies = {}; // { sectionKey: [ { title, story, year, rating, image, id } ] }  
+    let extraSections = []; // { key, title, icon, type, cat }  
 
-    // تحميل وحفظ البيانات  
-    function loadStored() {  
-        const stored = localStorage.getItem('watchgo_dev_data');  
-        if(stored) { try { const d=JSON.parse(stored); customMovies=d.customMovies||{}; extraSections=d.extraSections||[]; hiddenMovies=d.hiddenMovies||{}; sliderMovies=d.sliderMovies||[]; if(d.primaryColor) document.documentElement.style.setProperty('--primary', d.primaryColor); } catch(e){} }  
-        applyStoredTexts();  
-    }  
-    function saveStored() { localStorage.setItem('watchgo_dev_data', JSON.stringify({ customMovies, extraSections, hiddenMovies, sliderMovies, primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--primary') })); }  
-    function applyStoredTexts() { const stored=JSON.parse(localStorage.getItem('watchgo_edited_texts')||'{}'); for(const [sel, txt] of Object.entries(stored)){ const el=document.querySelector(sel); if(el) el.innerText=txt; } }  
-    function saveText(selector, newText){ let st=JSON.parse(localStorage.getItem('watchgo_edited_texts')||'{}'); st[selector]=newText; localStorage.setItem('watchgo_edited_texts',JSON.stringify(st)); }  
-
-    // إنشاء كارد  
-    async function createCard(m, type, isCustom=false, uniqueId=null){  
-        if(isCustom){  
-            return `<div class="item-card" data-unique-id="${uniqueId}" data-custom="true" onclick="location.href='movie.html?id=custom_${uniqueId}&type=${type}'"><img src="${m.image}" onerror="this.src='https://via.placeholder.com/500x750'"><div class="hover-details"><div class="item-name">${m.title}</div><p class="item-story">${m.story}</p><div class="meta-info"><span>${m.year}</span><span><i class="fa-solid fa-star"></i> ${m.rating}</span></div><div class="watch-btn">مشاهدة</div></div></div>`;  
+    // تحميل البيانات المخزنة  
+    function loadStoredData() {  
+        const stored = localStorage.getItem('watchgo_dev_custom');  
+        if(stored) {  
+            try {  
+                const data = JSON.parse(stored);  
+                customMovies = data.customMovies || {};  
+                extraSections = data.extraSections || [];  
+                applyStoredTexts();  
+            } catch(e) {}  
         }  
-        const isArabic=m.original_language==='ar'; const date=m.release_date||m.first_air_date||'2026'; const year=date.split('-')[0];  
-        const resAr=await fetch(`${BASE_URL}?endpoint=${type}/${m.id}`); const arData=await resAr.json();  
-        const displayName=isArabic?(arData.title||arData.name||m.title||m.name):(m.title||m.name);  
-        const displayStory=arData.overview||"لا يوجد وصف";  
-        return `<div class="item-card" data-id="${m.id}" data-type="${type}" data-unique-id="${m.id}_${type}" onclick="location.href='movie.html?id=${m.id}&type=${type}'"><img src="https://image.tmdb.org/t/p/w500${m.poster_path}"><div class="hover-details"><div class="item-name">${displayName}</div><p class="item-story">${displayStory}</p><div class="meta-info"><span>${year}</span><span><i class="fa-solid fa-star"></i> ${m.vote_average.toFixed(1)}</span></div><div class="watch-btn">مشاهدة</div></div></div>`;  
     }  
 
-    // تحميل قسم مع لانهائي  
-    async function loadSectionInfinite(sectionKey, type, urlPath, cat, page, append=true){  
-        const state=infiniteState[sectionKey]||{page:1, loading:false, hasMore:true};  
-        if(state.loading || (!append && page!==1)) return;  
-        state.loading=true; if(!append) state.page=page; else state.page++;  
-        infiniteState[sectionKey]=state;  
-        const gridId=sectionKey==='full'?'fullGrid':(sectionKey+'_grid');  
-        const container=document.getElementById(gridId); if(!container && sectionKey!=='full') return;  
-        if(!append && container) container.innerHTML='';  
-        let url=`${BASE_URL}?endpoint=${urlPath}&page=${state.page}`;  
-        if(type==='movie') url+='&sort_by=primary_release_date.desc'; else url+='&sort_by=first_air_date.desc';  
-        if(cat==='egypt') url+='&with_origin_country=EG&with_original_language=ar';  
-        else if(cat==='arabic_only') url+='&with_original_language=ar&without_origin_country=EG';  
-        else if(cat==='ramadan') url+='&with_original_language=ar&first_air_date_year=2026';  
-        try{  
-            const res=await fetch(url); const data=await res.json();  
-            let movies=data.results||[]; const hiddenSet=new Set(hiddenMovies[sectionKey]||[]);  
-            movies=movies.filter(m=>!hiddenSet.has(`${m.id}_${type}`));  
-            const customList=customMovies[sectionKey]||[];  
-            let allItems=[...customList.map(c=>createCard(c,type,true,c.id)), ...movies.map(m=>createCard(m,type))];  
-            const cards=await Promise.all(allItems);  
-            if(container){  
-                if(append) container.insertAdjacentHTML('beforeend', cards.join(''));  
-                else container.innerHTML=cards.join('');  
+    function saveStoredData() {  
+        localStorage.setItem('watchgo_dev_custom', JSON.stringify({ customMovies, extraSections }));  
+    }  
+
+    function applyStoredTexts() {  
+        // تعديل النصوص المخزنة (عناوين الأقسام، القوائم)  
+        const storedTexts = JSON.parse(localStorage.getItem('watchgo_edited_texts') || '{}');  
+        for(const [selector, newText] of Object.entries(storedTexts)) {  
+            const el = document.querySelector(selector);  
+            if(el && !el.classList.contains('section-title-text')) el.innerText = newText;  
+            else if(el && el.classList.contains('section-title-text')) el.innerText = newText;  
+        }  
+    }  
+
+    function saveText(selector, newText) {  
+        let stored = JSON.parse(localStorage.getItem('watchgo_edited_texts') || '{}');  
+        stored[selector] = newText;  
+        localStorage.setItem('watchgo_edited_texts', JSON.stringify(stored));  
+    }  
+
+    // إنشاء كارد (يدوي أو API)  
+    async function createCard(m, type, isCustom = false) {  
+        if(isCustom) {  
+            return `  
+                <div class="item-card custom-movie" data-custom-id="${m.id}">  
+                    <img src="${m.image}" alt="${m.title}" onerror="this.src='https://via.placeholder.com/500x750?text=No+Image'">  
+                    <div class="hover-details">  
+                        <div class="item-name" style="direction: rtl">${m.title}</div>  
+                        <p class="item-story">${m.story}</p>  
+                        <div class="meta-info"><span>${m.year}</span><span><i class="fa-solid fa-star"></i> ${m.rating}</span></div>  
+                        <div class="watch-btn">مشاهدة الآن</div>  
+                    </div>  
+                </div>`;  
+        }  
+        const isArabic = m.original_language === 'ar';  
+        const date = m.release_date || m.first_air_date || '2026';  
+        const year = date.split('-')[0];  
+        const resAr = await fetch(`${BASE_URL}?endpoint=${type}/${m.id}`);  
+        const arData = await resAr.json();  
+        const displayName = isArabic ? (arData.title || arData.name || m.title || m.name) : (m.title || m.name);  
+        const displayStory = arData.overview || "لا يوجد وصف عربي حالياً.";  
+        return `  
+            <div class="item-card" onclick="location.href='movie.html?id=${m.id}&type=${type}'">  
+                <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" alt="${displayName}" onerror="this.src='https://via.placeholder.com/500x750?text=No+Image'">  
+                <div class="hover-details">  
+                    <div class="item-name" style="direction: ${isArabic ? 'rtl' : 'ltr'}">${displayName}</div>  
+                    <p class="item-story">${displayStory}</p>  
+                    <div class="meta-info"><span>${year}</span><span><i class="fa-solid fa-star"></i> ${m.vote_average.toFixed(1)}</span></div>  
+                    <div class="watch-btn">مشاهدة الآن</div>  
+                </div>  
+            </div>`;  
+    }  
+
+    // تحميل قسم مع إضافة الأفلام المخصصة  
+    async function loadSectionWithCustom(urlPath, gridId, pagId, type, cat = '', pageNum = 1, sectionKey) {  
+        const sortParam = type === 'movie' ? '&sort_by=primary_release_date.desc' : '&sort_by=first_air_date.desc';  
+        let finalUrl = `${BASE_URL}?endpoint=${urlPath}${sortParam}&page=${pageNum}`;  
+        if(cat === 'egypt') finalUrl += `&with_origin_country=EG&with_original_language=ar`;  
+        else if(cat === 'arabic_only') finalUrl += `&with_original_language=ar&without_origin_country=EG`;  
+        else if(cat === 'ramadan') finalUrl += `&with_original_language=ar&first_air_date_year=2026`;  
+        try {  
+            const res = await fetch(finalUrl);  
+            const data = await res.json();  
+            let movies = data.results || [];  
+            movies = movies.slice(0, 12);  
+            const cards = await Promise.all(movies.map(m => createCard(m, type)));  
+            const customList = customMovies[sectionKey] || [];  
+            const customCards = customList.map(m => createCard(m, type, true));  
+            const allCards = [...customCards, ...cards];  
+            document.getElementById(gridId).innerHTML = allCards.join('');  
+            let pagHtml = '';  
+            for(let i=1; i<=Math.min(data.total_pages || 1, 5); i++) {  
+                pagHtml += `<button class="page-btn ${i === pageNum ? 'active' : ''}" onclick="loadSectionWithCustom('${urlPath}', '${gridId}', '${pagId}', '${type}', '${cat}', ${i}, '${sectionKey}')">${i}</button>`;  
             }  
-            state.hasMore = data.page < data.total_pages;  
-            if(editMode) attachDeleteButtonsToGrid(gridId, sectionKey, type);  
-        } catch(e){}  
-        state.loading=false; infiniteState[sectionKey]=state;  
+            document.getElementById(pagId).innerHTML = pagHtml;  
+        } catch(e) { console.error(e); }  
     }  
 
-    function attachDeleteButtonsToGrid(gridId, sectionKey, type){  
-        const grid=document.getElementById(gridId); if(!grid) return;  
-        grid.querySelectorAll('.item-card').forEach(card=>{  
-            if(card.querySelector('.delete-item-btn')) return;  
-            const btn=document.createElement('div'); btn.className='delete-item-btn'; btn.innerHTML='×';  
-            btn.onclick=(e)=>{ e.stopPropagation(); const unique=card.dataset.uniqueId||(card.dataset.id+'_'+card.dataset.type); if(unique){ if(!hiddenMovies[sectionKey]) hiddenMovies[sectionKey]=[]; hiddenMovies[sectionKey].push(unique); saveStored(); card.remove(); } };  
-            card.style.position='relative'; card.appendChild(btn);  
+    function initSections() {  
+        loadSectionWithCustom('discover/tv', 'ramadanGrid', 'ramadanPag', 'tv', 'ramadan', 1, 'ramadan');  
+        loadSectionWithCustom('discover/movie', 'egyptGrid', 'egyptPag', 'movie', 'egypt', 1, 'egypt');  
+        loadSectionWithCustom('discover/movie', 'arabicGrid', 'arabicPag', 'movie', 'arabic_only', 1, 'arabic');  
+        loadSectionWithCustom('discover/movie', 'moviesGrid', 'moviesPag', 'movie', '', 1, 'global');  
+    }  
+
+    async function init() {  
+        loadStoredData();  
+        initSections();  
+        try {  
+            const pop = await fetch(`${BASE_URL}?endpoint=movie/now_playing&language=en-US`);  
+            const pData = await pop.json();  
+            renderSlider(pData.results.slice(0, 5));  
+            const top = await fetch(`${BASE_URL}?endpoint=movie/top_rated&language=ar-SA`);  
+            const tData = await top.json();  
+            document.getElementById('bestMoviesSide').innerHTML = tData.results.slice(0, 8).map(m => `<div class="side-item" onclick="location.href='movie.html?id=${m.id}&type=movie'"><img src="https://image.tmdb.org/t/p/w200${m.poster_path}"><div class="txt">${m.title}</div></div>`).join('');  
+            const ani = await fetch(`${BASE_URL}?endpoint=discover/movie&with_genres=16&language=en-US`);  
+            const aniData = await ani.json();  
+            document.getElementById('animeSide').innerHTML = aniData.results.slice(0, 8).map(m => `<div class="side-item" onclick="location.href='movie.html?id=${m.id}&type=movie'"><img src="https://image.tmdb.org/t/p/w200${m.poster_path}"><div class="txt">${m.title}</div></div>`).join('');  
+        } catch(e) { console.error(e); }  
+        renderExtraSections();  
+    }  
+
+    function renderSlider(movies) {  
+        const wrapper = document.getElementById('sliderWrapper');  
+        wrapper.innerHTML = movies.map(m => `<div class="slide" style="background-image: url('https://image.tmdb.org/t/p/original${m.backdrop_path}')"><div class="slide-overlay"><h2 class="slide-title">${m.title}</h2><a href="movie.html?id=${m.id}&type=movie" class="watch-btn" style="width:120px;">شاهد الآن</a></div></div>`).join('');  
+        let i = 0; setInterval(() => { i = (i + 1) % movies.length; wrapper.style.transform = `translateX(${i * 100}%)`; }, 5000);  
+    }  
+
+    // وضع التحرير  
+    function enableEditMode(enable) {  
+        editMode = enable;  
+        if(enable) document.body.classList.add('edit-mode-enabled');  
+        else document.body.classList.remove('edit-mode-enabled');  
+        attachEditFeatures();  
+    }  
+
+    function attachEditFeatures() {  
+        document.querySelectorAll('.section-title-text, .side-title, .nav-link, .dropdown a, .logo-ctn span, .side-item .txt').forEach(el => {  
+            if(editMode) {  
+                el.setAttribute('contenteditable', 'true');  
+                el.classList.add('editable-element');  
+                el.addEventListener('blur', function() { saveText(getSelector(this), this.innerText); });  
+            } else {  
+                el.removeAttribute('contenteditable');  
+                el.classList.remove('editable-element');  
+            }  
         });  
-    }  
-
-    function initInfiniteScroll(){  
-        const observer=new IntersectionObserver((entries)=>{  
-            entries.forEach(entry=>{ if(entry.isIntersecting){ const trigger=entry.target; const sectionKey=trigger.dataset.section; if(sectionKey && infiniteState[sectionKey] && infiniteState[sectionKey].hasMore && !infiniteState[sectionKey].loading){  
-                if(sectionKey==='full' && currentFullState){ loadSectionInfinite('full', currentFullState.type, currentFullState.urlPath, currentFullState.cat, null, true); }  
-                else{ const secBox=document.querySelector(`.section-box[data-section-key="${sectionKey}"]`); if(secBox){ const type=secBox.dataset.type, url=secBox.dataset.url, cat=secBox.dataset.cat||''; loadSectionInfinite(sectionKey, type, url, cat, null, true); } }  
-            } } });  
-        }, {threshold:0.5});  
-        document.querySelectorAll('.infinite-scroll-trigger').forEach(t=>observer.observe(t));  
-    }  
-
-    async function initSections(){  
-        const sections=[{key:'ramadan',type:'tv',url:'discover/tv',cat:'ramadan'},{key:'egypt',type:'movie',url:'discover/movie',cat:'egypt'},{key:'arabic',type:'movie',url:'discover/movie',cat:'arabic_only'},{key:'global',type:'movie',url:'discover/movie',cat:''}];  
-        for(const s of sections){ infiniteState[s.key]={page:1,loading:false,hasMore:true}; await loadSectionInfinite(s.key, s.type, s.url, s.cat, 1, false); }  
-    }  
-
-    async function initSlider(){  
-        if(sliderMovies.length===0){  
-            const pop=await fetch(`${BASE_URL}?endpoint=movie/now_playing&language=en-US`); const data=await pop.json(); sliderMovies=data.results.slice(0,5).map(m=>({id:m.id,title:m.title,backdrop:m.backdrop_path,type:'movie'}));  
-            saveStored();  
+        // أزرار إضافة فيلم لكل قسم  
+        if(editMode) {  
+            document.querySelectorAll('.section-box').forEach(section => {  
+                if(!section.querySelector('.add-movie-btn')) {  
+                    const btn = document.createElement('div');  
+                    btn.className = 'add-movie-btn';  
+                    btn.innerText = '+ إضافة فيلم مخصص';  
+                    btn.style.cssText = 'background: var(--primary); padding: 6px 12px; margin-top: 10px; border-radius: 20px; font-size:12px; cursor:pointer; width:fit-content;';  
+                    btn.onclick = () => addCustomMoviePrompt(section.dataset.sectionKey);  
+                    section.appendChild(btn);  
+                }  
+            });  
+            if(!document.getElementById('globalAddSection')) {  
+                const addSecBtn = document.createElement('div');  
+                addSecBtn.id = 'globalAddSection';  
+                addSecBtn.className = 'add-section-btn';  
+                addSecBtn.innerText = '➕ إضافة قسم جديد';  
+                addSecBtn.style.cssText = 'background: #2ecc71; display:inline-block; margin:20px 0; padding:10px 20px; border-radius:30px; cursor:pointer;';  
+                document.getElementById('mainCol').appendChild(addSecBtn);  
+                addSecBtn.onclick = addNewSection;  
+            }  
+        } else {  
+            document.querySelectorAll('.add-movie-btn').forEach(btn => btn.remove());  
+            const secBtn = document.getElementById('globalAddSection'); if(secBtn) secBtn.remove();  
         }  
-        renderSlider();  
-    }  
-    function renderSlider(){  
-        const wrapper=document.getElementById('sliderWrapper'); if(!wrapper) return;  
-        wrapper.innerHTML=sliderMovies.map(m=>`<div class="slide" style="background-image: url('https://image.tmdb.org/t/p/original${m.backdrop}')"><div class="slide-overlay"><h2 class="slide-title">${m.title}</h2><a href="movie.html?id=${m.id}&type=${m.type}" class="watch-btn" style="width:120px;">شاهد</a></div></div>`).join('');  
-        if(sliderInterval) clearInterval(sliderInterval); let i=0; sliderInterval=setInterval(()=>{ i=(i+1)%sliderMovies.length; wrapper.style.transform=`translateX(-${i*100}%)`; },5000);  
     }  
 
-    // مودال مخصص  
-    function showModal(title, fields, onSubmit){  
-        const modal=document.createElement('div'); modal.className='modal-overlay';  
-        let html=`<div class="modal-content"><h3>${title}</h3>`;  
-        fields.forEach(f=>{ html+=`<input type="${f.type||'text'}" id="modal_${f.name}" placeholder="${f.placeholder}" ${f.value?`value="${f.value}"`:''}>`; });  
-        html+=`<div class="modal-buttons"><button id="modalCancel">إلغاء</button><button id="modalConfirm" style="background:var(--primary);color:white">تأكيد</button></div></div>`;  
-        modal.innerHTML=html; document.body.appendChild(modal);  
-        document.getElementById('modalCancel').onclick=()=>modal.remove();  
-        document.getElementById('modalConfirm').onclick=()=>{ const data={}; fields.forEach(f=>{ data[f.name]=document.getElementById(`modal_${f.name}`).value; }); modal.remove(); onSubmit(data); };  
+    function addCustomMoviePrompt(sectionKey) {  
+        const title = prompt('أدخل عنوان الفيلم/المسلسل:');  
+        if(!title) return;  
+        const story = prompt('وصف قصير:');  
+        const year = prompt('السنة:');  
+        const rating = prompt('التقييم (مثلاً 7.5):');  
+        const image = prompt('رابط الصورة (poster):', 'https://via.placeholder.com/500x750');  
+        const newMovie = { id: Date.now(), title, story, year, rating, image };  
+        if(!customMovies[sectionKey]) customMovies[sectionKey] = [];  
+        customMovies[sectionKey].unshift(newMovie);  
+        saveStoredData();  
+        // إعادة تحميل القسم  
+        if(sectionKey === 'ramadan') loadSectionWithCustom('discover/tv', 'ramadanGrid', 'ramadanPag', 'tv', 'ramadan', 1, 'ramadan');  
+        else if(sectionKey === 'egypt') loadSectionWithCustom('discover/movie', 'egyptGrid', 'egyptPag', 'movie', 'egypt', 1, 'egypt');  
+        else if(sectionKey === 'arabic') loadSectionWithCustom('discover/movie', 'arabicGrid', 'arabicPag', 'movie', 'arabic_only', 1, 'arabic');  
+        else if(sectionKey === 'global') loadSectionWithCustom('discover/movie', 'moviesGrid', 'moviesPag', 'movie', '', 1, 'global');  
+        else renderExtraSections();  
     }  
 
-    // إضافة قسم جديد  
-    function addNewSection(){  
-        showModal('إضافة قسم جديد', [{name:'title',placeholder:'عنوان القسم',type:'text'}], (data)=>{ if(data.title){ extraSections.push({key:'extra_'+Date.now(), title:data.title, icon:'fa-film'}); saveStored(); renderExtraSections(); } });  
+    function addNewSection() {  
+        let title = prompt('عنوان القسم الجديد:');  
+        if(!title) return;  
+        let key = 'extra_' + Date.now();  
+        extraSections.push({ key, title, icon: 'fa-film' });  
+        saveStoredData();  
+        renderExtraSections();  
     }  
 
-    function renderExtraSections(){  
-        const container=document.getElementById('extraSectionsContainer'); container.innerHTML='';  
-        extraSections.forEach(sec=>{  
-            const div=document.createElement('section'); div.className='section-box'; div.dataset.sectionKey=sec.key; div.dataset.type='movie'; div.dataset.url='discover/movie'; div.dataset.cat='';  
-            div.innerHTML=`<div class="section-title"><span><i class="fa-solid ${sec.icon}"></i> <span class="section-title-text">${sec.title}</span></span></div><div class="grid-display" id="${sec.key}_grid"></div><div class="infinite-scroll-trigger" data-section="${sec.key}"></div>`;  
-            container.appendChild(div);  
-            infiniteState[sec.key]={page:1,loading:false,hasMore:true};  
-            loadSectionInfinite(sec.key, 'movie', 'discover/movie', '', 1, false);  
+    function renderExtraSections() {  
+        const container = document.getElementById('extraSectionsContainer');  
+        container.innerHTML = '';  
+        extraSections.forEach((sec, idx) => {  
+            const sectionDiv = document.createElement('section');  
+            sectionDiv.className = 'section-box';  
+            sectionDiv.dataset.sectionKey = sec.key;  
+            sectionDiv.innerHTML = `<div class="section-title"><span><i class="fa-solid ${sec.icon || 'fa-film'}"></i> <span class="section-title-text" data-original="${sec.title}">${sec.title}</span></span> ${editMode ? '<span class="delete-item-btn" style="position:relative; display:inline-block; margin-right:10px;" onclick="removeExtraSection(\''+sec.key+'\')">✖</span>' : ''}</div><div class="grid-display" id="grid_${sec.key}"></div><div class="pagination-container" id="pag_${sec.key}"></div>`;  
+            container.appendChild(sectionDiv);  
+            // تحميل بيانات فارغة أو مخصصة  
+            loadSectionWithCustom('discover/movie', `grid_${sec.key}`, `pag_${sec.key}`, 'movie', '', 1, sec.key);  
         });  
-        initInfiniteScroll();  
+        if(editMode) attachEditFeatures();  
     }  
 
-    // إدارة السلايدر  
-    function editSlider(){  
-        let slidesHtml=sliderMovies.map((s,i)=>`<div style="display:flex; justify-content:space-between; margin:10px 0; background:#222; padding:10px;"><span>${s.title}</span><button class="delete-slide-btn" data-index="${i}" style="background:#e50914; border:none; color:white; border-radius:20px;">✖</button></div>`).join('');  
-        const modalDiv=document.createElement('div'); modalDiv.className='modal-overlay';  
-        modalDiv.innerHTML=`<div class="modal-content" style="max-width:600px;"><h3>تعديل السلايدر</h3><div id="slidesList">${slidesHtml}</div><input type="text" id="searchMovieForSlider" placeholder="ابحث عن فيلم/مسلسل لإضافته"><button id="searchMovieBtn" style="margin:10px 0; background:var(--primary);">بحث</button><div id="searchResults"></div><div class="modal-buttons"><button id="closeSliderModal">إغلاق</button></div></div>`;  
-        document.body.appendChild(modalDiv);  
-        modalDiv.querySelectorAll('.delete-slide-btn').forEach(btn=>{ btn.onclick=()=>{ const idx=parseInt(btn.dataset.index); sliderMovies.splice(idx,1); saveStored(); modalDiv.remove(); editSlider(); }; });  
-        modalDiv.querySelector('#searchMovieBtn').onclick=async()=>{ const q=modalDiv.querySelector('#searchMovieForSlider').value; if(q.length<2) return; const res=await fetch(`${BASE_URL}?endpoint=search/multi&query=${q}&language=en-US`); const data=await res.json(); const results=data.results.filter(r=>r.media_type==='movie'||r.media_type==='tv').slice(0,5); let html=''; for(const r of results){ html+=`<div style="display:flex; gap:10px; margin:10px; align-items:center;"><img src="https://image.tmdb.org/t/p/w92${r.poster_path}" width="40"><span>${r.title||r.name}</span><button class="addSlideBtn" data-id="${r.id}" data-type="${r.media_type}" data-title="${r.title||r.name}" data-backdrop="${r.backdrop_path||r.poster_path}">إضافة</button></div>`; }  
-            modalDiv.querySelector('#searchResults').innerHTML=html;  
-            modalDiv.querySelectorAll('.addSlideBtn').forEach(btn=>{ btn.onclick=()=>{ sliderMovies.push({id:btn.dataset.id,title:btn.dataset.title,backdrop:btn.dataset.backdrop,type:btn.dataset.type}); saveStored(); renderSlider(); modalDiv.remove(); editSlider(); }; });  
-        };  
-        modalDiv.querySelector('#closeSliderModal').onclick=()=>modalDiv.remove();  
+    function removeExtraSection(key) {  
+        extraSections = extraSections.filter(s => s.key !== key);  
+        delete customMovies[key];  
+        saveStoredData();  
+        renderExtraSections();  
     }  
 
-    window.showFull=async function(endpoint, title, cat, page=1){  
-        document.getElementById('mainDisplay').classList.add('hidden'); document.getElementById('sliderArea').classList.add('hidden'); document.getElementById('fullView').classList.remove('hidden'); document.getElementById('fullTitle').innerText=title;  
-        currentFullState={urlPath:endpoint, cat:cat, type:endpoint.includes('tv')?'tv':'movie'};  
-        infiniteState['full']={page:1,loading:false,hasMore:true};  
-        await loadSectionInfinite('full', currentFullState.type, endpoint, cat, 1, false);  
-        window.scrollTo(0,0);  
+    window.showFull = async function(endpoint, title, cat, page = 1) {  
+        document.getElementById('mainDisplay').classList.add('hidden');  
+        document.getElementById('sliderArea').classList.add('hidden');  
+        document.getElementById('fullView').classList.remove('hidden');  
+        document.getElementById('fullTitle').innerText = title;  
+        const sortParam = endpoint.includes('tv') ? '&sort_by=first_air_date.desc' : '&sort_by=primary_release_date.desc';  
+        let url = `${BASE_URL}?endpoint=${endpoint}${sortParam}&page=${page}`;  
+        if(cat === 'egypt') url += `&with_origin_country=EG&with_original_language=ar`;  
+        else if(cat === 'arabic_only') url += `&with_original_language=ar&without_origin_country=EG`;  
+        else if(cat === 'netflix') url += `&with_networks=213`;  
+        else if(cat === 'ramadan') url += `&with_original_language=ar&first_air_date_year=2026`;  
+        else if(cat === '16') url += `&with_genres=16`;  
+        else if(cat === 'eg-tv') url += `&with_origin_country=EG&with_original_language=ar`;  
+        else if(!isNaN(cat)) url += `&with_genres=${cat}`;  
+        const res = await fetch(url);  
+        const data = await res.json();  
+        const type = endpoint.includes('tv') ? 'tv' : 'movie';  
+        const cards = await Promise.all(data.results.map(m => createCard(m, type)));  
+        document.getElementById('fullGrid').innerHTML = cards.join('');  
+        let pagHtml = '';  
+        for(let i=1; i<=Math.min(data.total_pages || 1, 10); i++) {  
+            pagHtml += `<button class="page-btn ${i === page ? 'active' : ''}" onclick="showFull('${endpoint}', '${title}', '${cat}', ${i})">${i}</button>`;  
+        }  
+        document.getElementById('fullPag').innerHTML = pagHtml;  
+        window.scrollTo(0, 0);  
     };  
 
-    function toggleSearch(){ const s=document.getElementById("searchBox"); s.style.display=s.style.display==="block"?"none":"block"; if(s.style.display==="block") document.getElementById("searchInput").focus(); }  
-    async function smartSearch(query){ if(query.length<2) return; document.getElementById('mainDisplay').classList.add('hidden'); document.getElementById('sliderArea').classList.add('hidden'); document.getElementById('fullView').classList.remove('hidden'); document.getElementById('fullTitle').innerHTML=`نتائج: ${query}`;  
-        const [movieRes,tvRes]=await Promise.all([fetch(`${BASE_URL}?endpoint=search/movie&query=${query}&language=ar-SA`), fetch(`${BASE_URL}?endpoint=search/tv&query=${query}&language=ar-SA`)]);  
-        const movieData=await movieRes.json(), tvData=await tvRes.json();  
-        let results=[...(movieData.results||[]).map(i=>({...i,media_type:'movie'})),...(tvData.results||[]).map(i=>({...i,media_type:'tv'}))].filter(i=>i.poster_path);  
-        currentFullState={urlPath:'search', cat:'', type:'movie'};  
-        infiniteState['full']={page:1,loading:false,hasMore:false};  
-        const cards=await Promise.all(results.map(m=>createCard(m,m.media_type)));  
-        document.getElementById('fullGrid').innerHTML=cards.join('');  
+    window.toggleSearch = function() {  
+        const s = document.getElementById("searchBox");  
+        s.style.display = s.style.display === "block" ? "none" : "block";  
+        if(s.style.display === "block") document.getElementById("searchInput").focus();  
+    };  
+
+    window.smartSearch = function(query) {  
+        if(query.length < 2) return;  
+        executeSmartSearch(query);  
+    };  
+
+    async function executeSmartSearch(query) {  
+        document.getElementById('mainDisplay').classList.add('hidden');  
+        document.getElementById('sliderArea').classList.add('hidden');  
+        document.getElementById('fullView').classList.remove('hidden');  
+        document.getElementById('fullTitle').innerHTML = `<i class="fa-solid fa-magnifying-glass"></i> نتائج البحث عن: ${query}`;  
+        document.getElementById('fullGrid').innerHTML = '<div class="no-results">جاري البحث...</div>';  
+        try {  
+            const [movieRes, tvRes] = await Promise.all([  
+                fetch(`${BASE_URL}?endpoint=search/movie&query=${query}&language=ar-SA`),  
+                fetch(`${BASE_URL}?endpoint=search/tv&query=${query}&language=ar-SA`)  
+            ]);  
+            const movieData = await movieRes.json();  
+            const tvData = await tvRes.json();  
+            let combinedResults = [  
+                ...(movieData.results || []).map(i => ({...i, media_type: 'movie'})),  
+                ...(tvData.results || []).map(i => ({...i, media_type: 'tv'}))  
+            ].filter(item => item.poster_path).sort((a,b)=>b.popularity-a.popularity);  
+            if(combinedResults.length===0){ document.getElementById('fullGrid').innerHTML='<div class="no-results">لا نتائج</div>'; return; }  
+            const cards = await Promise.all(combinedResults.map(m => createCard(m, m.media_type)));  
+            document.getElementById('fullGrid').innerHTML = cards.join('');  
+        } catch(e) { document.getElementById('fullGrid').innerHTML = '<div class="no-results">خطأ</div>'; }  
     }  
 
-    function enableEditMode(enable){ editMode=enable; if(enable) document.body.classList.add('edit-mode-enabled'); else document.body.classList.remove('edit-mode-enabled'); attachEditFeatures(); }  
-    function attachEditFeatures(){  
-        if(editMode){  
-            if(!document.querySelector('.edit-slider-btn')){ const btn=document.createElement('div'); btn.className='edit-slider-btn'; btn.innerHTML='✏️ تعديل السلايدر'; btn.onclick=editSlider; document.querySelector('.slider-container').appendChild(btn); }  
-            document.querySelectorAll('.section-box').forEach(sec=>{ if(!sec.querySelector('.add-movie-btn')){ const btn=document.createElement('div'); btn.className='add-movie-btn'; btn.innerText='+ إضافة فيلم'; btn.onclick=()=>{ showModal('إضافة فيلم مخصص',[{name:'title',placeholder:'العنوان'},{name:'story',placeholder:'القصة'},{name:'year',placeholder:'السنة'},{name:'rating',placeholder:'التقييم'},{name:'image',placeholder:'رابط الصورة'}], data=>{ if(data.title){ const key=sec.dataset.sectionKey; if(!customMovies[key]) customMovies[key]=[]; customMovies[key].unshift({id:Date.now(),title:data.title,story:data.story,year:data.year,rating:data.rating,image:data.image}); saveStored(); loadSectionInfinite(key, sec.dataset.type, sec.dataset.url, sec.dataset.cat||'', 1, false); } }); }; sec.appendChild(btn); } });  
-            if(!document.getElementById('globalAddSection')){ const addSecBtn=document.createElement('div'); addSecBtn.id='globalAddSection'; addSecBtn.className='add-section-btn'; addSecBtn.innerText='➕ إضافة قسم جديد'; addSecBtn.onclick=addNewSection; document.getElementById('mainCol').appendChild(addSecBtn); }  
-            ['ramadanGrid','egyptGrid','arabicGrid','moviesGrid','fullGrid'].forEach(gridId=>{ const secKey=gridId.replace('_grid',''); attachDeleteButtonsToGrid(gridId, secKey, 'movie'); });  
-        } else { document.querySelectorAll('.add-movie-btn, .edit-slider-btn, #globalAddSection').forEach(el=>el.remove()); }  
+    function getSelector(el) {  
+        if(el.classList && el.classList.contains('section-title-text')) return `.section-title-text[data-original="${el.innerText}"]`;  
+        if(el.classList && el.classList.contains('side-title')) return `#${el.id}`;  
+        if(el.classList && el.classList.contains('nav-link')) return `.nav-link:contains("${el.innerText.split(' ')[0]}")`;  
+        return 'body';  
     }  
 
-    // إعدادات اللون  
-    document.getElementById('colorPickerBtn').onclick=()=>{ const input=document.createElement('input'); input.type='color'; input.value=getComputedStyle(document.documentElement).getPropertyValue('--primary').trim(); input.onchange=e=>{ document.documentElement.style.setProperty('--primary', e.target.value); saveStored(); }; input.click(); };  
-    document.getElementById('toggleEditModeBtn').onclick=()=>enableEditMode(!editMode);  
-    loadStored(); initSections(); initSlider(); initInfiniteScroll();  
-    fetch(`${BASE_URL}?endpoint=movie/top_rated&language=ar-SA`).then(r=>r.json()).then(d=>{ document.getElementById('bestMoviesSide').innerHTML=d.results.slice(0,8).map(m=>`<div class="side-item" onclick="location.href='movie.html?id=${m.id}&type=movie'"><img src="https://image.tmdb.org/t/p/w200${m.poster_path}"><div class="txt">${m.title}</div></div>`).join(''); });  
-    fetch(`${BASE_URL}?endpoint=discover/movie&with_genres=16&language=en-US`).then(r=>r.json()).then(d=>{ document.getElementById('animeSide').innerHTML=d.results.slice(0,8).map(m=>`<div class="side-item" onclick="location.href='movie.html?id=${m.id}&type=movie'"><img src="https://image.tmdb.org/t/p/w200${m.poster_path}"><div class="txt">${m.title}</div></div>`).join(''); });  
+    document.getElementById('toggleEditModeBtn').addEventListener('click', () => {  
+        enableEditMode(!editMode);  
+    });  
+
+    init();  
 </script>  
 </body>  
 </html>
+شوف الكود اللي انت عملته كان عاجبني شوف كان مليان تفاصيل وكله بتاع انا كنت بس عاوزك تزود عليه التعديلات اللي انا قلتها انت بقى عملت ايه
