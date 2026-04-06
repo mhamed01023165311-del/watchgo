@@ -101,171 +101,184 @@
     </style>
 </head>
 <body>
-    <!-- === الهيرو سلايدر + الأقسام الرئيسية === -->
-<div id="heroSection">
-    <div class="slider-wrapper" id="sliderWrapper">
-        <div class="slide" style="background-image: url('https://picsum.photos/1620/420?random=1');">
-            <div class="slide-overlay">
-                <div class="slide-title" contenteditable="true">أحدث الأفلام</div>
-            </div>
-        </div>
-        <div class="slide" style="background-image: url('https://picsum.photos/1620/420?random=2');">
-            <div class="slide-overlay">
-                <div class="slide-title" contenteditable="true">أفضل المسلسلات</div>
-            </div>
-        </div>
-        <div class="slide" style="background-image: url('https://picsum.photos/1620/420?random=3');">
-            <div class="slide-overlay">
-                <div class="slide-title" contenteditable="true">العروض المميزة</div>
-            </div>
-        </div>
-    </div>
-</div>
+    <script>
+    const BASE_URL = 'https://script.google.com/macros/s/AKfycbw4GkkBMwuUqmeMBYUNV1u0LvQvMla1MgM6ActKpZsdhVvPUnUqdi1StaL_1KkEgniV2A/exec';
 
-<div class="container">
-    <!-- أقسام محتوى -->
-    <div class="section-box" id="mainSections">
-        <div class="section-title" contenteditable="true">قسم الأكشن</div>
-        <div class="grid-display" id="section1">
-            <div class="item-card">
-                <img src="https://picsum.photos/200/260?random=11" alt="Movie 1">
-                <div class="hover-details"><div class="item-name" contenteditable="true">فيلم أكشن 1</div></div>
-            </div>
-            <div class="item-card">
-                <img src="https://picsum.photos/200/260?random=12" alt="Movie 2">
-                <div class="hover-details"><div class="item-name" contenteditable="true">فيلم أكشن 2</div></div>
-            </div>
-            <div class="add-card-btn" onclick="openAddCardModal('section1')">
-                <i class="fas fa-plus"></i> إضافة فيلم
-            </div>
-        </div>
-    </div>
+    /* --- وظائف الإضافة والإدارة --- */
+    function focusElement(id) { document.getElementById(id).focus(); }
 
-    <div class="section-box" id="mainSections2">
-        <div class="section-title" contenteditable="true">قسم الكوميديا</div>
-        <div class="grid-display" id="section2">
-            <div class="item-card">
-                <img src="https://picsum.photos/200/260?random=21" alt="Movie 3">
-                <div class="hover-details"><div class="item-name" contenteditable="true">فيلم كوميدي 1</div></div>
-            </div>
-            <div class="item-card">
-                <img src="https://picsum.photos/200/260?random=22" alt="Movie 4">
-                <div class="hover-details"><div class="item-name" contenteditable="true">فيلم كوميدي 2</div></div>
-            </div>
-            <div class="add-card-btn" onclick="openAddCardModal('section2')">
-                <i class="fas fa-plus"></i> إضافة فيلم
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- === أزرار التحكم العائمة === -->
-<div class="admin-controls">
-    <button class="master-btn save-all-btn" onclick="saveAll()">💾 حفظ الكل</button>
-    <button class="master-btn add-section-btn" onclick="openAddSectionModal()">➕ قسم جديد</button>
-</div>
-
-<!-- === المودال لإضافة بطاقة جديدة === -->
-<div class="admin-modal" id="addCardModal">
-    <div class="modal-content">
-        <h3>إضافة فيلم جديد</h3>
-        <input type="text" id="cardTitle" placeholder="اسم الفيلم">
-        <input type="url" id="cardImage" placeholder="رابط الصورة">
-        <button class="save-btn" onclick="addCard()">إضافة</button>
-    </div>
-</div>
-
-<!-- === المودال لإضافة قسم جديد === -->
-<div class="admin-modal" id="addSectionModal">
-    <div class="modal-content">
-        <h3>إضافة قسم جديد</h3>
-        <input type="text" id="sectionTitle" placeholder="اسم القسم">
-        <button class="save-btn" onclick="addSection()">إضافة القسم</button>
-    </div>
-</div>
-
-<script>
-    let currentAddSectionId = '';
-    let currentAddCardSection = '';
-
-    function openAddCardModal(sectionId){
-        currentAddCardSection = sectionId;
-        document.getElementById('addCardModal').style.display = 'flex';
+    function changeLogo() {
+        const newUrl = prompt("أدخل رابط صورة اللوجو الجديد:");
+        if(newUrl) document.getElementById('mainLogo').src = newUrl;
     }
 
-    function openAddSectionModal(){
-        document.getElementById('addSectionModal').style.display = 'flex';
-    }
-
-    function closeModals(){
-        document.getElementById('addCardModal').style.display = 'none';
-        document.getElementById('addSectionModal').style.display = 'none';
-    }
-
-    function addCard(){
-        const title = document.getElementById('cardTitle').value;
-        const image = document.getElementById('cardImage').value;
-        if(title && image){
-            const cardHTML = `
-                <div class="item-card">
-                    <img src="${image}" alt="${title}">
-                    <div class="hover-details"><div class="item-name" contenteditable="true">${title}</div></div>
+    function createNewSection() {
+        const name = prompt("ما هو اسم القسم الجديد؟");
+        if(!name) return;
+        const id = 'sec_' + Date.now();
+        const html = `
+            <section class="section-box" id="${id}">
+                <div class="section-title">
+                    <span contenteditable="true">${name}</span>
+                    <i class="fa-solid fa-trash" style="margin-right:auto; cursor:pointer; color:#555;" onclick="document.getElementById('${id}').remove()"></i>
                 </div>
-            `;
-            const section = document.getElementById(currentAddCardSection);
-            section.insertAdjacentHTML('beforeend', cardHTML);
-            closeModals();
-            document.getElementById('cardTitle').value = '';
-            document.getElementById('cardImage').value = '';
-        } else {
-            alert('الرجاء إدخال كل الحقول');
-        }
-    }
-
-    function addSection(){
-        const title = document.getElementById('sectionTitle').value;
-        if(title){
-            const sectionsContainer = document.getElementById('mainSections').parentNode;
-            const newSectionHTML = `
-                <div class="section-box">
-                    <div class="section-title" contenteditable="true">${title}</div>
-                    <div class="grid-display" id="section${Date.now()}">
-                        <div class="add-card-btn" onclick="openAddCardModal('section${Date.now()}')">
-                            <i class="fas fa-plus"></i> إضافة فيلم
-                        </div>
+                <div class="grid-display">
+                    <div class="add-card-btn" onclick="openAdminModal()">
+                        <i class="fa-solid fa-plus-circle"></i>
+                        <span>أضف عمل</span>
                     </div>
                 </div>
-            `;
-            sectionsContainer.insertAdjacentHTML('beforeend', newSectionHTML);
-            closeModals();
-            document.getElementById('sectionTitle').value = '';
-        } else {
-            alert('ادخل اسم القسم');
-        }
+            </section>`;
+        document.getElementById('additionalSections').insertAdjacentHTML('beforeend', html);
     }
 
-    function saveAll(){
-        alert('تم حفظ كل التعديلات! 💾');
-        // هنا ممكن تضيف كود حفظ التعديلات في قاعدة بيانات أو LocalStorage
+    async function saveEverythingToBaqr() {
+        const data = {
+            siteName: document.getElementById('siteTitleText').innerText,
+            logo: document.getElementById('mainLogo').src,
+            themeColor: getComputedStyle(document.documentElement).getPropertyValue('--primary'),
+            sections: Array.from(document.querySelectorAll('.section-title span')).map(s => s.innerText)
+        };
+        
+        alert("جاري رفع التعديلات لـ Google Sheets (BaqrDB)...");
+        try {
+            await fetch(BASE_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
+            alert("✅ تم الحفظ بنجاح!");
+        } catch(e) { alert("❌ خطأ في الاتصال بالسيرفر."); }
     }
 
-    // سلايدر بسيط
-    let slideIndex = 0;
-    const slides = document.querySelectorAll('.slide');
-    function showSlides(){
-        slides.forEach((s, i) => s.style.display = 'none');
-        slideIndex++;
-        if(slideIndex > slides.length) slideIndex = 1;
-        slides[slideIndex-1].style.display = 'block';
-        setTimeout(showSlides, 5000);
+    function changeMainTheme(color) {
+        document.documentElement.style.setProperty('--primary', color);
     }
-    showSlides();
 
-    // غلق المودالات عند الضغط خارجها
-    window.onclick = function(e){
-        if(e.target.classList.contains('admin-modal')) closeModals();
+    function openAdminModal() { document.getElementById('adminModal').style.display = 'flex'; }
+    function closeAdminModal() { document.getElementById('adminModal').style.display = 'none'; }
+
+    async function saveToBaqr() {
+        const title = document.getElementById('mTitle').value;
+        const img = document.getElementById('mImg').value;
+        if(!title || !img) return alert("يرجى إدخال البيانات الأساسية!");
+        
+        const movieData = { title, img, desc: document.getElementById('mDesc').value, rate: document.getElementById('mRate').value };
+        await fetch(BASE_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(movieData) });
+        alert("تم إرسال العمل بنجاح!");
+        closeAdminModal();
     }
-</script>
 
-</body>
-</html>
+    /* --- الكود الأصلي الخاص بعرض المحتوى --- */
+    function toggleSearch() { 
+        const s = document.getElementById("searchBox");
+        const isVisible = s.style.display === "block";
+        s.style.display = isVisible ? "none" : "block";
+        if(!isVisible) document.getElementById("searchInput").focus();
+    }
+
+    async function createCard(m, type) {
+        const isArabic = m.original_language === 'ar';
+        const date = m.release_date || m.first_air_date || '2026';
+        const year = date.split('-')[0];
+        const resAr = await fetch(`${BASE_URL}?endpoint=${type}/${m.id}`);
+        const arData = await resAr.json();
+        const displayName = isArabic ? (arData.title || arData.name || m.title || m.name) : (m.title || m.name);
+        const displayStory = arData.overview || "لا يوجد وصف عربي حالياً.";
+
+        return `
+            <div class="item-card" onclick="location.href='movie.html?id=${m.id}&type=${type}'">
+                <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" alt="${displayName}" onerror="this.src='https://via.placeholder.com/500x750?text=No+Image'">
+                <div class="hover-details">
+                    <div class="item-name" style="direction: ${isArabic ? 'rtl' : 'ltr'}">${displayName}</div>
+                    <p class="item-story" style="font-size: 11px; color: #ccc; line-height: 1.5; margin-bottom: 10px; height: 50px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; text-align: center; direction: rtl;">${displayStory}</p>
+                    <div class="meta-info" style="display: flex; justify-content: center; gap: 8px; font-size: 10px; color: #aaa; margin-bottom: 10px;">
+                        <span style="border: 1px solid #333; padding: 2px 6px; border-radius: 3px; background: #000;">${year}</span>
+                        <span style="color: #f1c40f;"><i class="fa-solid fa-star"></i> ${m.vote_average.toFixed(1)}</span>
+                    </div>
+                    <div class="watch-btn" style="background: var(--primary); color: #fff; font-size: 12px; padding: 8px; border-radius: 4px; font-weight: bold; display: block; text-align: center; text-decoration: none;">مشاهدة الآن</div>
+                </div>
+            </div>`;
+    }
+
+    let searchTimer;
+    function smartSearch(query) {
+        clearTimeout(searchTimer);
+        if (query.length < 2) return;
+        searchTimer = setTimeout(() => executeSmartSearch(query), 500);
+    }
+
+    async function executeSmartSearch(query) {
+        document.getElementById('mainDisplay').classList.add('hidden');
+        document.getElementById('sliderArea').classList.add('hidden');
+        document.getElementById('fullView').classList.remove('hidden');
+        document.getElementById('fullTitle').innerHTML = `<i class="fa-solid fa-magnifying-glass"></i> نتائج البحث عن: ${query}`;
+        document.getElementById('fullGrid').innerHTML = '<div class="no-results">جاري البحث...</div>';
+        try {
+            const [movieRes, tvRes] = await Promise.all([
+                fetch(`${BASE_URL}?endpoint=search/movie&query=${query}&language=ar-SA`),
+                fetch(`${BASE_URL}?endpoint=search/tv&query=${query}&language=ar-SA`)
+            ]);
+            const movieData = await movieRes.json();
+            const tvData = await tvRes.json();
+            let combinedResults = [
+                ...(movieData.results || []).map(i => ({...i, media_type: 'movie'})),
+                ...(tvData.results || []).map(i => ({...i, media_type: 'tv'}))
+            ].filter(item => item.poster_path).sort((a, b) => b.popularity - a.popularity);
+            if (combinedResults.length === 0) {
+                document.getElementById('fullGrid').innerHTML = '<div class="no-results">عذراً، لم نجد نتائج.</div>';
+                return;
+            }
+            const cards = await Promise.all(combinedResults.map(m => createCard(m, m.media_type)));
+            document.getElementById('fullGrid').innerHTML = cards.join('');
+        } catch (err) { document.getElementById('fullGrid').innerHTML = '<div class="no-results">حدث خطأ.</div>'; }
+    }
+
+    async function loadSection(urlPath, gridId, pagId, type, cat = '', pageNum = 1) {
+        const sortParam = type === 'movie' ? '&sort_by=primary_release_date.desc' : '&sort_by=first_air_date.desc';
+        let finalUrl = `${BASE_URL}?endpoint=${urlPath}${sortParam}&page=${pageNum}`;
+        if(cat === 'egypt') finalUrl += `&with_origin_country=EG&with_original_language=ar`;
+        else if(cat === 'arabic_only') finalUrl += `&with_original_language=ar&without_origin_country=EG`;
+        else if(cat === 'ramadan') finalUrl += `&with_original_language=ar&first_air_date_year=2026`;
+        try {
+            const res = await fetch(finalUrl);
+            const data = await res.json();
+            const movies = data.results || []; 
+            const cards = await Promise.all(movies.slice(0, 12).map(m => createCard(m, type)));
+            document.getElementById(gridId).innerHTML = (gridId === 'developerGrid' ? document.getElementById(gridId).innerHTML : '') + cards.join('');
+            let pagHtml = '';
+            for(let i=1; i<=Math.min(data.total_pages || 1, 5); i++) {
+                pagHtml += `<button class="page-btn ${i === pageNum ? 'active' : ''}" onclick="loadSection('${urlPath}', '${gridId}', '${pagId}', '${type}', '${cat}', ${i})">${i}</button>`;
+            }
+            document.getElementById(pagId).innerHTML = pagHtml;
+        } catch(e) { console.error(e); }
+    }
+
+    async function init() {
+        loadSection('discover/tv', 'ramadanGrid', 'ramadanPag', 'tv', 'ramadan');
+        loadSection('discover/movie', 'egyptGrid', 'egyptPag', 'movie', 'egypt');
+        try {
+            const pop = await fetch(`${BASE_URL}?endpoint=movie/now_playing&language=en-US`);
+            const pData = await pop.json();
+            renderSlider(pData.results.slice(0, 5));
+            const top = await fetch(`${BASE_URL}?endpoint=movie/top_rated&language=ar-SA`);
+            const tData = await top.json();
+            document.getElementById('bestMoviesSide').innerHTML = tData.results.slice(0, 8).map(m => `
+                <div class="side-item" onclick="location.href='movie.html?id=${m.id}&type=movie'">
+                    <img src="https://image.tmdb.org/t/p/w200${m.poster_path}">
+                    <div class="txt" style="margin-right:10px; font-size: 11px; color: #ccc;">${m.title}</div>
+                </div>`).join('');
+        } catch(e) { console.error(e); }
+    }
+
+    function renderSlider(movies) {
+        const wrapper = document.getElementById('sliderWrapper');
+        wrapper.innerHTML = movies.map(m => `
+            <div class="slide" style="background-image: url('https://image.tmdb.org/t/p/original${m.backdrop_path}')">
+                <div class="slide-overlay">
+                    <h2 class="slide-title">${m.title}</h2>
+                    <a href="movie.html?id=${m.id}&type=movie" class="watch-btn" style="background: var(--primary); color: #fff; font-size: 12px; padding: 8px; border-radius: 4px; font-weight: bold; display: block; text-align: center; text-decoration: none; width:120px;">شاهد الآن</a>
+                </div>
+            </div>`).join('');
+        let i = 0; setInterval(() => { i = (i + 1) % movies.length; wrapper.style.transform = `translateX(${i * 100}%)`; }, 5000);
+    }
+
+    init();
+                           </script>
+    
